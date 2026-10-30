@@ -1,0 +1,1163 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Examens blancs SQL</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Caveat:wght@600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Concept : une copie d'examen à carreaux. Encre bleue pour l'élève, stylo rouge pour la correction. */
+:root{
+  --paper:#f6f8ff; --grid:#dfe7f6; --sheet:#ffffff; --field:#fbfcff;
+  --ink:#16214a; --soft:#53608a; --rule:#d9e2f4; --rule2:#b7c6e6;
+  --blue:#2342b8; --on-blue:#ffffff; --blue-bg:#e6ebfc;
+  --pen:#cf2233; --margin:#e4606c;
+  --ok:#12794b; --ok-bg:#e0f3e8; --bad:#b3202e; --bad-bg:#fde9eb; --warn:#7a4f00; --warn-bg:#fff3d6;
+  --code:#eff3fb;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'Instrument Sans','Segoe UI',system-ui,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --f-pen:'Caveat','Segoe Print','Bradley Hand',cursive;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0e1220; --grid:#1a2240; --sheet:#161b2e; --field:#0f1424;
+  --ink:#e6eaf9; --soft:#9aa6cf; --rule:#252e4c; --rule2:#38446c;
+  --blue:#93a8ff; --on-blue:#0e1220; --blue-bg:#1d2750;
+  --pen:#ff6f7c; --margin:#c24a5b;
+  --ok:#56d198; --ok-bg:#12301f; --bad:#ff7d88; --bad-bg:#3a1820; --warn:#ffd27a; --warn-bg:#3a2d10;
+  --code:#121729; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1220; --grid:#1a2240; --sheet:#161b2e; --field:#0f1424;
+  --ink:#e6eaf9; --soft:#9aa6cf; --rule:#252e4c; --rule2:#38446c;
+  --blue:#93a8ff; --on-blue:#0e1220; --blue-bg:#1d2750;
+  --pen:#ff6f7c; --margin:#c24a5b;
+  --ok:#56d198; --ok-bg:#12301f; --bad:#ff7d88; --bad-bg:#3a1820; --warn:#ffd27a; --warn-bg:#3a2d10;
+  --code:#121729; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background-color:var(--paper); color:var(--ink);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:100% 32px,128px 100%;
+  font:400 16px/1.55 var(--f-body);
+  padding-block:0 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--paper);z-index:30}
+.wrap{max-width:900px;margin:0 auto}
+code,pre,.mono{font-family:var(--f-mono)}
+code{font-size:.88em;background:var(--code);padding:1px 5px;border-radius:4px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+/* En-tête */
+.top{padding:28px 0 6px}
+.kick{font:500 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:0 0 10px}
+h1{font:800 clamp(34px,7vw,56px)/1 var(--f-display);margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1 span{background:linear-gradient(transparent 62%,var(--blue-bg) 62%);padding:0 .08em}
+.sub{margin:12px 0 0;color:var(--soft);max-width:60ch}
+
+/* Onglets */
+.tabsbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);margin-top:14px;border-bottom:2px solid var(--rule2)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 0 0;scrollbar-width:thin}
+.tab{flex:0 0 auto;border:1.5px solid var(--rule2);border-bottom:none;background:var(--sheet);color:var(--soft);padding:9px 16px;border-radius:9px 9px 0 0;cursor:pointer;font-weight:600;font-size:15px;white-space:nowrap;margin-bottom:-2px}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.tab .tick{font-family:var(--f-pen);font-size:20px;line-height:1;margin-left:6px;color:var(--pen)}
+.tab[aria-selected="true"] .tick{color:var(--on-blue)}
+
+main{padding-top:22px;min-height:60vh}
+@media (min-width:720px){
+  main{border-left:2px solid var(--margin);padding-left:26px}
+}
+
+/* Intro d'examen */
+.intro{background:var(--sheet);border:1.5px solid var(--rule2);border-radius:12px;padding:20px 22px;margin-bottom:22px}
+.intro h2{font:800 28px/1.1 var(--f-display);margin:0 0 8px;letter-spacing:-.01em}
+.intro p{margin:6px 0;color:var(--soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.chip{font:500 13px/1 var(--f-mono);padding:7px 10px;border-radius:6px;background:var(--blue-bg);color:var(--blue)}
+.rules{margin:14px 0 0;padding-left:18px;color:var(--soft);font-size:15px}
+.rules li{margin:3px 0}
+
+/* Sections */
+.part{margin:34px 0 14px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.part h3{font:800 24px/1.1 var(--f-display);margin:0;letter-spacing:-.01em}
+.part .pts{font:500 13px/1 var(--f-mono);color:var(--soft)}
+
+/* Questions */
+.q{position:relative;background:var(--sheet);border:1.5px solid var(--rule2);border-radius:12px;padding:16px 18px 18px;margin:0 0 14px}
+.qhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.qn{font:700 13px/1 var(--f-mono);color:var(--blue);background:var(--blue-bg);padding:5px 8px;border-radius:5px}
+.qt{font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+.qq{margin:6px 0 12px;font-weight:600;font-size:17px;text-wrap:pretty;padding-right:84px}
+.q.nomark .qq{padding-right:0}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--rule);border-radius:9px;cursor:pointer;background:var(--field)}
+.opt:hover{border-color:var(--blue)}
+.opt input{margin-top:4px;accent-color:var(--blue);flex:0 0 auto}
+.opt .ltr{font:600 13px/1.6 var(--f-mono);color:var(--soft);flex:0 0 auto}
+.opt .txt{min-width:0;overflow-wrap:anywhere}
+.done .opt{cursor:default}
+.opt.good{background:var(--ok-bg);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+textarea{width:100%;min-height:112px;resize:vertical;border:1.5px solid var(--rule2);border-radius:9px;padding:4px 12px;color:var(--ink);font:400 16px/28px var(--f-body);background-color:var(--field);
+  background-image:repeating-linear-gradient(transparent 0 27px,var(--rule) 27px 28px);background-attachment:local}
+textarea:focus{border-color:var(--blue)}
+textarea[readonly]{opacity:.95}
+
+/* Annotation au stylo */
+.mark{position:absolute;top:12px;right:16px;font:700 26px/1 var(--f-pen);transform:rotate(-5deg);pointer-events:none}
+.mark.ok{color:var(--ok)} .mark.ko{color:var(--pen)} .mark.mid{color:var(--warn)}
+.fb{margin-top:12px;font-size:15px;color:var(--soft)}
+.fb b{color:var(--ink)}
+.kws{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;font:500 12px/1.2 var(--f-mono)}
+.kw{padding:5px 8px;border-radius:5px}
+.kw.y{background:var(--ok-bg);color:var(--ok)}
+.kw.n{background:var(--bad-bg);color:var(--bad);text-decoration:line-through}
+.model{margin-top:10px;padding:12px 14px;background:var(--code);border-radius:8px;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.model b{font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--soft);display:block;margin-bottom:6px}
+
+/* Code */
+.codeintro{margin:0 0 10px;color:var(--soft);font-size:15px}
+pre.code{margin:0;padding:14px 16px;background:var(--code);border:1px solid var(--rule);border-radius:9px;overflow-x:auto;font-size:13.5px;line-height:2;white-space:pre;tab-size:4}
+input.blank{font:500 13.5px/1.2 var(--f-mono);color:var(--ink);background:var(--blue-bg);border:none;border-bottom:2px solid var(--blue);border-radius:3px 3px 0 0;padding:2px 5px;margin:0 1px;min-width:4ch;vertical-align:baseline}
+input.blank:focus{outline:2px solid var(--blue)}
+input.blank.ok{background:var(--ok-bg);border-bottom-color:var(--ok)}
+input.blank.ko{background:var(--bad-bg);border-bottom-color:var(--bad)}
+.ans{font:500 12px/1 var(--f-mono);color:var(--ok);background:var(--ok-bg);padding:2px 6px;border-radius:4px;margin-left:2px;white-space:nowrap}
+
+/* Barre d'action */
+.bar{position:sticky;bottom:0;z-index:15;margin:26px 0 0;background:var(--sheet);border:1.5px solid var(--rule2);border-radius:12px 12px 0 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:14px;align-items:center;flex-wrap:wrap;box-shadow:0 -6px 18px rgba(10,20,60,.08)}
+.prog{flex:1 1 200px;min-width:0}
+.prog .lbl{font:500 13px/1.3 var(--f-mono);color:var(--soft)}
+.meter{height:6px;background:var(--rule);border-radius:3px;margin-top:6px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--blue);width:0;transition:width .2s}
+.btn{border:none;background:var(--blue);color:var(--on-blue);font-weight:700;padding:12px 24px;border-radius:9px;cursor:pointer;font-size:16px}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.warnmsg{flex:1 1 100%;font-size:14px;color:var(--warn);background:var(--warn-bg);padding:8px 12px;border-radius:8px}
+
+/* Copie corrigée */
+.copie{background:var(--sheet);border:1.5px solid var(--rule2);border-radius:12px;padding:22px;margin-bottom:26px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+@media (max-width:620px){.copie{grid-template-columns:1fr;justify-items:start}}
+.note{font:700 clamp(56px,13vw,84px)/1 var(--f-pen);color:var(--pen);border:4px solid var(--pen);border-radius:50%;padding:8px 30px 14px;transform:rotate(-4deg);white-space:nowrap}
+.note small{font-size:.5em}
+.copie h2{font:800 22px/1.2 var(--f-display);margin:0 0 4px}
+.rows{display:grid;gap:10px;margin:12px 0}
+.row{display:grid;grid-template-columns:7.5em 1fr auto;gap:12px;align-items:center;font-size:14px}
+.row .meter{margin:0;height:8px}
+.row .meter i{background:var(--pen)}
+.row .v{font:500 13px/1 var(--f-mono);color:var(--soft)}
+.redo{margin:12px 0 0;font-size:15px;color:var(--soft)}
+.redo b{color:var(--ink)}
+.redo ul{margin:6px 0 0;padding-left:18px}
+
+/* Fiche de révision */
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.search{flex:1 1 220px;min-width:0;border:1.5px solid var(--rule2);border-radius:9px;padding:10px 12px;background:var(--field);color:var(--ink);font:inherit}
+.fchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.fc{border:1.5px solid var(--rule2);background:var(--sheet);color:var(--soft);padding:7px 12px;border-radius:999px;cursor:pointer;font-size:14px;font-weight:500}
+.fc[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.toggle{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--soft);cursor:pointer}
+.toggle input{accent-color:var(--blue)}
+.chaphead{font:800 24px/1.1 var(--f-display);margin:30px 0 12px;letter-spacing:-.01em}
+.chaphead small{font:500 12px/1 var(--f-mono);color:var(--soft);margin-left:10px;letter-spacing:.08em}
+.defs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.def{background:var(--sheet);border:1.5px solid var(--rule2);border-radius:10px;padding:14px 16px;min-width:0}
+.def h4{font:700 17px/1.25 var(--f-display);margin:0 0 6px;color:var(--blue)}
+.def p{margin:0;font-size:15px;overflow-wrap:anywhere}
+.hidemode .def p{filter:blur(7px);cursor:pointer;user-select:none;transition:filter .15s}
+.hidemode .def.show p{filter:none;user-select:auto}
+.hidemode .def{cursor:pointer}
+.snips{display:grid;gap:10px}
+.snip{background:var(--sheet);border:1.5px solid var(--rule2);border-radius:10px;padding:0 16px}
+.snip summary{cursor:pointer;font:700 17px/1.3 var(--f-display);padding:12px 0}
+.snip pre{margin:0 0 14px;padding:14px;background:var(--code);border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.65}
+.traps{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:10px}
+.trap{background:var(--warn-bg);border-radius:10px;padding:12px 14px;font-size:15px;min-width:0}
+.trap b{display:block;color:var(--warn);margin-bottom:3px;overflow-wrap:anywhere}
+.steps{margin:0;padding-left:22px;display:grid;gap:6px}
+.empty{padding:24px;color:var(--soft);text-align:center}
+.foot{margin-top:40px;font-size:13px;color:var(--soft)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="wrap">
+  <header class="top">
+    <p class="kick">Licence Sciences pour la Santé · L2</p>
+    <h1>Examens blancs <span>SQL</span></h1>
+    <p class="sub">Quatre examens complets et un tirage aléatoire, avec QCM, QROC et questions sur le code. Tu réponds, tu cliques sur Finir, la copie est corrigée.</p>
+  </header>
+  <div class="tabsbar"><div class="tabs" role="tablist" id="tabs"></div></div>
+  <main id="app"></main>
+  <p class="foot">Questions écrites à partir des cours CM1 à CM5 et des TD. Ce n'est pas le sujet réel : les notions sont les mêmes, pas les questions.</p>
+</div>
+<script>
+/* Banque de QCM : [thème, question, bonne réponse, [3 mauvaises], explication] */
+const QCM = [
+/* ---------- CM1 : bases de données, UML, relationnel ---------- */
+["cm1","Qu'est-ce qu'un SGBD ?","Un logiciel qui prend en charge la structuration, le stockage, la mise à jour et la maintenance d'une base de données",["Un fichier qui contient toutes les données d'une entreprise","Un langage de requête standardisé","Un diagramme qui décrit les classes d'un système"],"Le SGBD est le logiciel qui gère la base. SQL est le langage, UML sert à modéliser."],
+["cm1","Dans un SGBD NoSQL de type clé-valeur, les données sont :","associées à une clé, sans structure tabulaire fixe",["organisées en tables reliées par des clés étrangères","décrites uniquement par un diagramme de classes","stockées dans une seule colonne de type texte"],"Le clé-valeur fonctionne comme un dictionnaire : à chaque clé correspond une valeur."],
+["cm1","Dans l'exemple `patient1 : Patient`, que représente `patient1` ?","Une instance : un objet concret de la classe Patient",["La classe Patient elle-même","Un attribut de la classe Patient","Une méthode de la classe Patient"],"Notation UML : nomObjet : NomClasse. La classe est le modèle, l'instance l'objet concret."],
+["cm1","Qu'est-ce qu'une méthode en UML ?","Une opération que les objets d'une classe peuvent exécuter (ex. isSick())",["Une information élémentaire qui caractérise la classe","Une colonne d'une table","Une clé qui identifie chaque instance"],"Attribut = information, méthode = comportement."],
+["cm1","Quelle correspondance entre le monde objet (UML) et le monde relationnel est correcte ?","Classe → table, attribut → colonne, objet → ligne",["Classe → ligne, attribut → table, objet → colonne","Classe → colonne, attribut → ligne, objet → table","Classe → clé primaire, attribut → clé étrangère, objet → table"],"C'est la correspondance fondamentale du CM1."],
+["cm1","Dans une table relationnelle, chaque ligne correspond :","à un objet du même type que toutes les autres lignes de la table",["à une propriété commune à tous les objets","à un domaine de valeurs","à une autre table"],"On ne mélange pas des voitures et des personnes dans une même table. Les colonnes sont les propriétés."],
+["cm1","Laquelle de ces écritures respecte la convention UML pour un attribut ?","couleurPlaque",["CouleurPlaque","couleur_plaque","couleursPlaques"],"Attributs : singulier, sans accent, minuscule au début, camelCase. Les classes sont en PascalCase."],
+["cm1","Que signifie la cardinalité 0..1 ?","Aucune ou une seule instance",["Exactement une instance","Au moins une instance","Aucune instance"],"1..1 = exactement une, 1..* = au moins une, 0..* = aucune, une ou plusieurs."],
+["cm1","Dans l'association « traitant » (Patient 0..N — 1 Medecin), que signifie le « 1 » ?","Chaque patient a exactement un médecin traitant",["Un médecin n'a qu'un seul patient","Un patient peut ne pas avoir de médecin traitant","Un patient a au moins un médecin parmi plusieurs"],"Cette relation est plus contrainte que la relation libre 0..N / 0..M."],
+["cm1","Dans quel cas utilise-t-on une classe-association ?","Quand une information décrit le lien entre deux classes, pas l'une des deux seule",["Quand une classe n'a pas de clé primaire","Quand deux classes portent le même nom","Quand toutes les cardinalités valent 1..1"],"Exemples du cours : Maladie, Don, Allergie, Prescription. Réflexe : l'information dépend du couple."],
+["cm1","Que doit garantir une clé primaire ?","Être unique et invariable pour chaque tuple",["Être unique mais modifiable à tout moment","Être non nulle mais pouvoir se répéter","Être toujours de type texte"],"Unicité et invariabilité assurent la cohérence du modèle relationnel."],
+["cm1","Quelle est la plus mauvaise clé primaire pour une table de patients ?","Le couple nom / prénom",["Le numéro de sécurité sociale","Un identifiant entier auto-incrémenté","Un numéro de carte d'identité"],"Des homonymes existent : nom / prénom n'est pas unique pour toujours."],
+["cm1","Dans une clé étrangère, quelle valeur trouve-t-on ?","La valeur de la clé primaire du tuple lié dans l'autre table",["Un numéro de ligne choisi au hasard","La liste de toutes les colonnes de l'autre table","Toujours la valeur NULL"],"C'est ce qui matérialise le lien et permet la jointure."],
+["cm1","Comment traduit-on une association plusieurs-à-plusieurs sans classe-association ?","Par une table de jonction dont la clé primaire est composée des deux clés étrangères",["Par une seule clé étrangère ajoutée dans l'une des tables","Par une colonne contenant les identifiants séparés par des virgules","En fusionnant les deux tables"],"Une ligne ne peut porter qu'une seule valeur de clé étrangère par colonne."],
+["cm1","Association 1-N entre Patient (côté N) et Medecin (côté 1) : où place-t-on la clé étrangère ?","Dans la table Patient, côté N",["Dans la table Medecin","Dans les deux tables","Dans une table de jonction obligatoire"],"La FK se place du côté « plusieurs » et référence la PK du côté « un »."],
+["cm1","Une chambre contient entre 2 et 4 lits, un lit appartient à exactement une chambre. Quelles cardinalités ?","2..4 côté Lit et 1 côté Chambre",["1..4 côté Lit et 0..1 côté Chambre","0..N côté Lit et 1..N côté Chambre","2..4 côté Chambre et 1 côté Lit"],"On lit la cardinalité à côté de la classe dont on compte les instances."],
+["cm1","TD2 : Prescription est une classe-association entre Patient et Medecin. Faut-il une table de jonction pour cette association ?","Non : la table Prescription porte déjà les clés étrangères vers Patient et Medecin",["Oui, toujours, avec une clé primaire composée","Oui, mais seulement si la prescription a une date","Non, car une classe-association ne devient jamais une table"],"La jonction ne sert que pour un N-N sans classe-association (ici Prescription ↔ Medicament)."],
+["cm1","SQL est :","un langage standardisé et déclaratif, implémenté par tous les SGBD relationnels",["un SGBD édité par Oracle","un langage uniquement procédural","un langage propre à MySQL"],"Chaque SGBD y ajoute ses nuances, mais les fondamentaux sont communs."],
+["cm1","Quel SGBD suit le plus fidèlement les recommandations du SQL ?","PostgreSQL",["MySQL","Oracle Database","SQLite"],"MySQL est plus permissif, Oracle ne suit pas toujours la syntaxe."],
+
+/* ---------- CM2 : SQL / MySQL ---------- */
+["cm2","Quel moteur de stockage MySQL gère les clés étrangères et les transactions ?","InnoDB",["MyISAM","SQLite","Aucun, MySQL ne gère jamais les FK"],"MyISAM est rapide mais sans FK ni transactions. On écrit ) ENGINE = InnoDB;"],
+["cm2","On insère 13265 dans une colonne TINYINT (maximum 127). Que fait MySQL ?","Il stocke la valeur la plus proche autorisée, ici 127",["Il refuse toujours l'insertion avec une erreur bloquante","Il stocke 0","Il convertit la valeur en texte"],"MySQL est permissif : débordement silencieux."],
+["cm2","Que fait AUTO_INCREMENT ?","Il prend la valeur maximum + 1 à chaque INSERT, une seule colonne par table",["Il prend une valeur aléatoire","Il autorise plusieurs colonnes automatiques par table","Il s'applique uniquement aux colonnes de type texte"],"On ne liste donc pas cette colonne dans l'INSERT."],
+["cm2","Que permet `DECIMAL(6,2)` ?","Jusqu'à 9999,99 avec exactement 2 chiffres après la virgule",["Jusqu'à 999999,99","6 chiffres après la virgule","De -99,9999 à 99,9999"],"M = chiffres au total, D = chiffres après la virgule. Exact, donc adapté aux montants."],
+["cm2","Quelle est la particularité de TIMESTAMP par rapport à DATETIME ?","TIMESTAMP se met à jour automatiquement avec la date courante",["TIMESTAMP ne stocke que l'année","TIMESTAMP est toujours sensible à la casse","DATETIME se met à jour automatiquement"],"Pratique pour dater une modification, mauvais pour une date métier fixe."],
+["cm2","Quelle différence entre CHAR(X) et VARCHAR(X) ?","CHAR est de taille fixe (complété par des blancs), VARCHAR de taille variable",["CHAR est de taille variable, VARCHAR de taille fixe","Aucune, ce sont des synonymes","CHAR sert aux images, VARCHAR aux nombres"],"Le type variable limite la place occupée."],
+["cm2","Que stocke une colonne `ENUM('IRM','Scanner','Radiographie')` ?","Une seule valeur parmi la liste",["Plusieurs valeurs de la liste à la fois","N'importe quel texte","Uniquement des nombres"],"SET permet un ensemble de valeurs. Une valeur hors liste est remplacée silencieusement."],
+["cm2","Colonne NOT NULL sans DEFAULT, aucune valeur fournie à l'INSERT : que se passe-t-il ?","Une erreur",["La colonne reçoit NULL","La colonne reçoit 0","La colonne reçoit une chaîne vide"],"Avec DEFAULT défini, c'est la valeur par défaut qui est utilisée."],
+["cm2","Quelle option de clé étrangère est incompatible avec une colonne NOT NULL ?","ON DELETE SET NULL",["ON DELETE RESTRICT","ON DELETE NO ACTION","ON UPDATE RESTRICT"],"SET NULL garde la ligne et met la référence à NULL."],
+["cm2","Que fait ON DELETE RESTRICT sur une clé étrangère ?","L'action est avortée : impossible de supprimer une ligne encore référencée",["Il supprime aussi les lignes liées","Il met la référence à NULL","Il ignore la contrainte"],"En MySQL, RESTRICT et NO ACTION sont équivalents."],
+["cm2","Pourquoi ON DELETE CASCADE est-il dangereux ?","Il répercute la suppression sur toutes les données liées",["Il bloque toutes les suppressions","Il rend la clé étrangère nulle","Il désactive l'intégrité référentielle"],"Une suppression en cascade peut effacer beaucoup plus que prévu."],
+["cm2","Une clé étrangère doit avoir :","exactement le même type que la colonne référencée",["n'importe quel type compatible avec du texte","un type plus petit que la colonne référencée","toujours le type INT"],"patient_id doit avoir le même type que Patient.numSecu."],
+["cm2","Quelle instruction MySQL agrandit la colonne nom de Patient à 80 caractères ?","ALTER TABLE Patient MODIFY COLUMN nom VARCHAR(80);",["UPDATE Patient SET nom = VARCHAR(80);","ALTER TABLE Patient ADD nom VARCHAR(80);","ALTER TABLE Patient DROP nom VARCHAR(80);"],"MODIFY change le type, ADD ajoute une colonne, UPDATE modifie des valeurs."],
+["cm2","Quelle instruction renomme la colonne telephone en tel_portable ?","ALTER TABLE Patient CHANGE telephone tel_portable VARCHAR(15);",["ALTER TABLE Patient MODIFY telephone tel_portable;","UPDATE Patient SET telephone = tel_portable;","ALTER TABLE Patient RENAME TABLE telephone;"],"CHANGE renomme (et redéclare le type) ; MODIFY ne renomme pas."],
+["cm2","Comment supprimer la contrainte de clé étrangère `fk_medecin` ?","ALTER TABLE Consultation DROP FOREIGN KEY fk_medecin;",["DROP TABLE fk_medecin;","ALTER TABLE Consultation DELETE fk_medecin;","UPDATE Consultation SET fk_medecin = NULL;"],"C'est pour cela qu'on nomme les contraintes avec CONSTRAINT."],
+["cm2","Dans quel ordre créer les tables Patient, Prescription (FK vers Patient) et LignePrescription ?","Patient, puis Prescription, puis LignePrescription",["Prescription, puis Patient, puis LignePrescription","LignePrescription, puis Prescription, puis Patient","L'ordre n'a aucune importance"],"Une table ne peut référencer qu'une table déjà créée."],
+["cm2","À quoi sert un index ?","À accélérer les recherches, les tris et les jointures",["À ajouter automatiquement des clés étrangères","À accélérer les écritures","À compresser la table"],"Il est mis à jour à chaque modification, donc il ralentit les écritures."],
+["cm2","Quelle colonne est une mauvaise cible pour un index ?","Une colonne booléenne à très peu de valeurs distinctes",["patient_id dans Consultation, souvent utilisée en jointure","Une clé étrangère à accès fréquent","Une colonne de tri très utilisée"],"À éviter aussi : colonnes souvent modifiées et petites tables."],
+["cm2","Quel type d'index permet la recherche de texte intégral ?","FULLTEXT, avec MATCH ... AGAINST",["UNIQUE","PRIMARY","INDEX secondaire sur un VARCHAR(5)"],"Exemple : MATCH(compte_rendu) AGAINST('douleur thoracique')."],
+["cm2","Pourquoi `CHECK (dateExamen <= NOW())` est-il refusé par MySQL ?","NOW() est une fonction non déterministe, interdite dans un CHECK",["Parce que CHECK n'existe pas en MySQL","Parce que dateExamen doit être un TIMESTAMP","Parce que CHECK n'accepte que des chaînes"],"Ce contrôle se fait dans l'application ou via un déclencheur."],
+["cm2","Qu'est-ce qu'une vue en SQL ?","Une table virtuelle dont seule la définition est stockée",["Une copie physique d'une table","Le résultat volatile d'un SELECT, jamais nommé","Une table dérivée stockée sur disque"],"Les tables dérivées sont créées par INSERT INTO ... SELECT et stockées."],
+
+/* ---------- CM3-4 : requêtes ---------- */
+["cm3","Que fait le LDD (langage de définition de données) ?","Il définit la structure des données (ex. CREATE TABLE)",["Il interroge les données","Il contrôle les droits d'accès","Il supprime uniquement des lignes"],"LDD définit, LMD manipule, LCD contrôle, LID interroge."],
+["cm3","Que fait `SELECT DISTINCT type FROM Actes` ?","Il élimine les doublons dans les valeurs de type",["Il trie les types par ordre alphabétique","Il compte les types","Il supprime les actes en double de la table"],"ALL (par défaut) conserve les doublons."],
+["cm3","Comment sélectionner les patients dont l'allergie est inconnue (NULL) ?","WHERE AllergiesCI IS NULL",["WHERE AllergiesCI = NULL","WHERE AllergiesCI = ''","WHERE AllergiesCI == NULL"],"Toute comparaison directe avec NULL est fausse. NULL et chaîne vide sont différents."],
+["cm3","Que renvoie `WHERE Nom LIKE 'M%'` ?","Les noms qui commencent par M",["Les noms qui contiennent exactement un M","Les noms qui finissent par M","Les noms de deux lettres commençant par M"],"% = chaîne quelconque (0 ou plus), _ = un seul caractère."],
+["cm3","Que fait `ORDER BY specialite, Nom` ?","Il trie par spécialité, puis par nom à l'intérieur d'une même spécialité",["Il trie uniquement par nom","Il regroupe les lignes par spécialité","Il trie par nom puis par spécialité"],"Le premier critère domine, le suivant départage les égalités."],
+["cm3","Quelle différence entre COUNT(*) et COUNT(colonne) ?","COUNT(*) compte toutes les lignes, COUNT(colonne) ignore les NULL",["COUNT(*) ignore les NULL","Aucune différence","COUNT(colonne) compte les valeurs distinctes"],"Les fonctions d'agrégat ignorent les NULL, sauf COUNT(*)."],
+["cm3","Règle du GROUP BY : que faut-il répéter dans le GROUP BY ?","Tous les attributs du SELECT qui ne sont pas dans une fonction d'agrégat",["Uniquement la clé primaire","Toutes les colonnes de la table","Aucune colonne, c'est optionnel"],"Les NULL sont considérés égaux entre eux pour le regroupement."],
+["cm3","À quoi sert HAVING ?","À filtrer les groupes sur une condition portant sur une fonction d'agrégat",["À filtrer les lignes avant le regroupement","À trier les résultats","À joindre deux tables"],"WHERE filtre les lignes, HAVING filtre les groupes."],
+["cm3","Quel est l'ordre correct des clauses ?","SELECT, FROM, JOIN, WHERE, GROUP BY, HAVING, ORDER BY",["SELECT, FROM, WHERE, HAVING, GROUP BY, ORDER BY","FROM, SELECT, WHERE, ORDER BY, GROUP BY","SELECT, WHERE, FROM, GROUP BY, ORDER BY, HAVING"],"Toutes les clauses vues se combinent dans cet ordre précis."],
+["cm3","Une jointure correspond à :","un produit cartésien, suivi d'une sélection puis d'une projection",["une simple union des deux tables","une projection suivie d'un produit cartésien","un tri suivi d'un regroupement"],"La sélection garde les lignes qui vérifient la condition de jointure."],
+["cm3","Dans une auto-jointure, que garantit `WHERE prem.nom < sec.nom` ?","Pas de doublons (A,B)/(B,A) et pas de paire d'une ligne avec elle-même",["Que les deux lignes ont le même nom","Que la jointure devient externe","Que les NULL sont conservés"],"La table est renommée deux fois pour jouer deux rôles."],
+["cm3","Que conserve un LEFT OUTER JOIN ?","Toutes les lignes de la table de gauche, avec NULL s'il n'y a pas de correspondance",["Uniquement les lignes avec correspondance","Toutes les lignes de la table de droite","Aucune ligne de la table de gauche"],"RIGHT OUTER JOIN est le symétrique, FULL OUTER JOIN conserve les deux côtés."],
+["cm3","Pourquoi un INNER JOIN entre Patient et Hospitalisation oublie-t-il certains patients ?","Les patients jamais hospitalisés n'ont pas de correspondance et sont éliminés",["Parce qu'il trie les résultats","Parce qu'il ne garde que les doublons","Parce qu'il supprime les NULL des deux tables"],"Il faut un LEFT OUTER JOIN depuis Patient."],
+["cm3","Pourquoi `WHERE NumMed NOT IN (SELECT NumMed FROM Prescription)` peut-il ne renvoyer aucune ligne ?","La sous-requête contient des NULL, ce qui rend la condition inconnue",["NOT IN est limité à 10 valeurs","Il faut toujours ajouter DISTINCT","NOT IN n'existe pas en SQL"],"Dans ce cas, préférer NOT EXISTS."],
+["cm3","Que teste EXISTS ?","Que la sous-requête renvoie au moins une ligne",["Que la table existe dans la base","Que toutes les lignes vérifient une condition","Que la sous-requête ne contient pas de NULL"],"NOT EXISTS teste l'absence de ligne."],
+["cm3","Que signifie `duree <= ALL (SELECT duree FROM emprunt)` ?","La durée est inférieure ou égale à toutes les durées de la sous-requête",["La durée est égale à au moins une durée","La durée est inférieure à la moyenne","La durée apparaît dans la sous-requête"],"ANY / SOME : vrai pour au moins un résultat de la sous-requête."],
+["cm3","Que fait l'opérateur UNION ?","Il regroupe les résultats de plusieurs requêtes ayant les mêmes attributs",["Il joint deux tables sur une clé étrangère","Il garde uniquement les lignes communes","Il trie deux requêtes"],"Penser à renommer les colonnes pour obtenir une table cohérente."],
+["cm3","Étude de cas facturation : pourquoi `SUM(forfait) + SUM(Prix) + SUM(Duree*Posologie*Prix_Dose)` après plusieurs jointures est-il faux ?","Les jointures multiples démultiplient les lignes, donc chaque somme est gonflée",["Parce que SUM ignore les valeurs positives","Parce qu'on ne peut pas additionner deux SUM","Parce que ISNULL est interdit"],"ISNULL règle seulement l'affichage des NULL. Le vrai correctif : des sous-requêtes séparées par type de dépense."],
+["cm3","Pourquoi grouper par la clé primaire (m.rpps) et pas seulement par m.nom ?","Deux médecins homonymes seraient sinon comptés ensemble",["Parce que GROUP BY n'accepte que des clés","Parce que m.nom est toujours NULL","Parce que COUNT ne fonctionne qu'avec une clé"],"Exemple du TD2 : nombre de prescriptions par médecin."],
+["cm3","Pour enregistrer une consultation d'un nouveau patient, dans quel ordre insérer ?","Patient, puis Hospitalisation, puis Actes",["Actes, puis Hospitalisation, puis Patient","Hospitalisation, puis Patient, puis Actes","Patient et Actes, puis Hospitalisation"],"Les identifiants automatiques doivent être relus entre deux insertions. NumActe n'est pas automatique."],
+["cm3","`datediff(yy, DateNaiss, getdate())` renvoie :","La différence en années entre la date de naissance et aujourd'hui",["La date du jour moins un an","Le nombre de jours depuis la naissance","L'année de naissance"],"Format yy = année, dd = jour, mm = mois."],
+["cm3","Que fait `UPDATE Medicament SET PrixDose = round(0.95 * PrixDose, 2) WHERE Indication LIKE 'antalgi%'` ?","Il baisse d'environ 5 % le prix des antalgiques, arrondi à 2 décimales",["Il supprime les antalgiques","Il insère un nouveau médicament à 95 % du prix","Il augmente tous les prix de 5 %"],"Sans WHERE, tous les médicaments seraient modifiés."],
+
+/* ---------- CM5 : entrepôt de données ---------- */
+["cm5","Selon Bill Inmon, un entrepôt de données est :","thématique, intégré, non volatil et historisé",["opérationnel, volatil, détaillé et unique","normalisé, volatil, local et temporaire","thématique, volatil, unique et mis à jour en continu"],"Quatre caractéristiques à connaître par coeur."],
+["cm5","Que signifie « données non volatiles » ?","Les données chargées ne sont ni modifiées ni supprimées : on ajoute de nouvelles périodes",["Les données sont effacées après chaque requête","Les données sont stockées en mémoire seulement","Les données sont réécrites chaque mois"],"Le mois de juin n'est jamais réécrit : juillet s'ajoute à côté."],
+["cm5","Que signifie « données intégrées » ?","Les sources sont uniformisées dans un référentiel unique (ex. un seul codage du sexe)",["Les données sont stockées dans un seul fichier","Les données sont chiffrées","Les données sont regroupées par utilisateur"],"Source A code 0/1, source B Homme/Femme : l'entrepôt unifie."],
+["cm5","Que signifie « données historisées » ?","Elles sont chargées en continu, datées et associées à un référentiel temps",["Elles ne contiennent que les données de l'année en cours","Elles sont supprimées après un an","Elles sont stockées sans date"],"Le déménagement d'un client est historisé, pas écrasé."],
+["cm5","Que signifie ETL ?","Extract, Transform, Load",["Entity, Table, Link","Export, Test, Log","Extend, Typecast, List"],"L'ETL alimente l'entrepôt à partir des applications sources."],
+["cm5","Que contient la Staging Area ?","Des données brutes, identiques aux sources, de façon temporaire",["L'historique complet sur plusieurs années","Des données entièrement normalisées en 3NF","Des cubes pré-calculés"],"L'ODS donne une vision opérationnelle récente, le 3NF centralise l'historique."],
+["cm5","Quelle est la portée d'un Data Mart ?","Locale : un seul département",["Globale : toute l'entreprise","Un seul fichier","Une seule requête"],"Le DWH est global, le cube OLAP répond à un besoin d'analyse précis."],
+["cm5","Qu'est-ce qu'un cube OLAP ?","Une structure multidimensionnelle très agrégée, ultra-rapide",["Une table relationnelle très détaillée","Un schéma de modélisation UML","Une table de jonction"],"Les données y sont pré-calculées."],
+["cm5","Que contiennent les métadonnées d'un entrepôt ?","Des informations sur les données (provenance, structure, règles de transformation, fréquence de chargement)",["Les mesures de la table de faits","Uniquement les mots de passe","Les données brutes des sources"],"Elles sont indispensables."],
+["cm5","Que contient une table de faits ?","Les mesures numériques et les clés étrangères vers les dimensions",["Les libellés textuels des dimensions","Uniquement la hiérarchie des dimensions","Les métadonnées de chargement"],"La mesure est à l'intersection de toutes les dimensions."],
+["cm5","Caractéristiques d'une table de dimension ?","Beaucoup de colonnes (attributs descriptifs), peu de lignes",["Peu de colonnes, énormément de lignes","Uniquement des colonnes numériques","Aucune clé primaire"],"La table de faits représente environ 90 % du volume de l'entrepôt."],
+["cm5","Qu'est-ce que le grain d'une table de faits ?","Le niveau de détail défini par la liste de ses dimensions",["Le nombre total de colonnes","La taille du fichier","Le type de moteur utilisé"],"Toutes les lignes d'une table de faits sont au même grain."],
+["cm5","Un solde bancaire est une mesure :","semi-additive : additionnable entre comptes, pas dans le temps",["additive sur toutes les dimensions","non additive comme un pourcentage","sans place dans un entrepôt"],"Un ratio ou un pourcentage est non additif."],
+["cm5","Que caractérise le schéma en étoile ?","Une table de faits au centre reliée à des dimensions par une seule jointure chacune",["Des dimensions normalisées sur plusieurs niveaux","Une table de dimensions au centre","Plusieurs tables de faits sans dimensions"],"Redondance acceptée pour des requêtes simples et rapides."],
+["cm5","Quelle est la différence du schéma en flocon de neige ?","Les hiérarchies de dimensions sont normalisées en plusieurs tables",["Il n'a pas de table de faits","Il n'utilise aucune clé étrangère","Il stocke uniquement des agrégats"],"Moins de redondance mais plus de jointures."],
+["cm5","Un client déménage de Lyon à Marseille et le métier veut garder l'historique. Quelle dimension à variation lente ?","Type 2 : nouvelle ligne avec dates de début et de fin",["Type 1 : on écrase l'ancienne valeur","Type 3 : uniquement une colonne « ancienne ville »","Aucune, c'est impossible"],"Type 1 écrase, type 2 trace, type 3 garde la version précédente dans une colonne."],
+["cm5","Instantané périodique (stocks) : que mesure-t-on ?","Les niveaux de stock à intervalle régulier, une ligne par période",["Chaque mouvement de stock","Le cycle complet d'un produit dans l'entrepôt","Uniquement les produits perdus"],"Transaction = une ligne par mouvement. Récapitulatif = une ligne par réception suivie jusqu'à la sortie."],
+["cm5","Dans un hypercube, que signifie « trancher » (slice) ?","Fixer une dimension pour obtenir un tableau à deux axes",["Changer les axes affichés en lignes et en colonnes","Supprimer la table de faits","Ajouter une dimension"],"Pivoter (dice) change les dimensions affichées en lignes et colonnes."]
+];
+/* QCM concours : [thème, question, options, indices des bonnes réponses, explication] */
+const QM = [
+/* CM1 */
+["cm1","Quelles affirmations sont vraies pour une clé primaire ?",["Elle identifie chaque tuple de façon unique","Elle peut changer de valeur au cours du temps","Elle doit être invariable","Elle peut contenir des doublons"],[0,2],"Une clé primaire est unique et invariable, c'est ce qui assure la cohérence du modèle relationnel."],
+["cm1","Quels SGBD sont des SGBD relationnels ?",["MySQL","SQLite","PostgreSQL","Un SGBD orienté graphe"],[0,1,2],"Un SGBD orienté graphe (comme clé-valeur ou orienté document) relève du NoSQL."],
+["cm1","Quelles écritures respectent les conventions de nommage UML du cours ?",["MaladieHereditaire (classe)","couleurPlaque (attribut)","Couleur_Plaque (attribut)","patients (classe)"],[0,1],"Classes : singulier, PascalCase. Attributs : singulier, camelCase, sans accent ni underscore."],
+["cm1","Une association plusieurs-à-plusieurs sans classe-association se traduit par :",["Une table de jonction","Une clé primaire composée des deux clés étrangères","Une simple clé étrangère ajoutée dans l'une des deux tables","La fusion des deux tables"],[0,1],"Une ligne ne peut porter qu'une valeur par colonne de clé étrangère : il faut une table dédiée."],
+["cm1","Quelles multiplicités autorisent l'absence de lien ?",["0..1","1","0..*","1..*"],[0,2],"Le minimum 0 autorise l'absence. 1 et 1..* imposent au moins un lien."],
+["cm1","Quelles informations justifient une classe-association ?",["La date d'une prescription entre un patient et un médecin","La gravité d'une allergie d'un patient à un médicament","Le nom d'un patient","Le numéro de sécurité sociale d'un patient"],[0,1],"L'information dépend du couple, pas d'une seule des deux classes."],
+["cm1","Quelles affirmations sont vraies pour une clé étrangère ?",["Elle référence la clé primaire d'une autre table","Elle doit avoir exactement le même type que la colonne référencée","Elle est toujours unique dans sa table","Elle matérialise le lien entre deux tables"],[0,1,3],"Plusieurs patients peuvent avoir le même médecin traitant : la FK n'est pas unique."],
+/* CM2 */
+["cm2","Quel type MySQL convient pour stocker un montant exact en euros ?",["DECIMAL(8,2)","FLOAT","DOUBLE","VARCHAR(8)"],[0],"FLOAT et DOUBLE sont approchés. DECIMAL(M,D) est exact."],
+["cm2","Quelles options ON DELETE sont compatibles avec une colonne NOT NULL ?",["RESTRICT","NO ACTION","SET NULL","CASCADE"],[0,1,3],"SET NULL met la référence à NULL, impossible avec NOT NULL."],
+["cm2","Quelles affirmations sont vraies pour le moteur InnoDB ?",["Il gère les clés étrangères","Il gère les transactions","Il récupère automatiquement après un incident","Il est plus rapide que MyISAM en insertion"],[0,1,2],"MyISAM est plus rapide mais sans FK ni transactions."],
+["cm2","Quelles colonnes sont de bonnes candidates à un index ?",["Une clé étrangère souvent utilisée en jointure","Une colonne booléenne","Une colonne souvent utilisée pour trier","Une colonne modifiée plusieurs fois par seconde"],[0,2],"On évite les colonnes à peu de valeurs distinctes et celles souvent modifiées."],
+["cm2","Quelles instructions sont valides en MySQL ?",["ALTER TABLE Patient ADD adresse VARCHAR(100);","ALTER TABLE Patient MODIFY COLUMN nom VARCHAR(80);","ALTER TABLE Consultation DROP FOREIGN KEY fk_medecin;","ALTER TABLE Patient REMOVE adresse;"],[0,1,2],"On supprime une colonne avec DROP COLUMN, pas REMOVE."],
+["cm2","Quelles affirmations sont vraies pour AUTO_INCREMENT ?",["Une seule colonne par table","La colonne est de type entier","On doit toujours la lister dans l'INSERT","Elle prend la valeur maximum + 1"],[0,1,3],"On laisse MySQL générer la valeur : on ne la liste pas."],
+["cm2","Quelles tables SQL sont stockées sur disque ?",["Une table de base","Le résultat d'un SELECT","Une table dérivée (INSERT INTO ... SELECT)","Une vue"],[0,2],"Le résultat d'un SELECT est volatile, une vue est virtuelle : seule sa définition est stockée."],
+["cm2","Quelles contraintes empêchent les doublons dans une colonne ?",["PRIMARY KEY","UNIQUE","NOT NULL","DEFAULT"],[0,1],"NOT NULL interdit l'absence de valeur, pas la répétition."],
+["cm2","Quelles affirmations sont vraies pour la contrainte CHECK ?",["NOW() y est interdit","Elle est ignorée silencieusement avant MySQL 8.0.16","Elle remplace les clés étrangères","Elle porte sur une condition de valeur"],[0,1,3],"NOW() est non déterministe : le contrôle se fait dans l'application ou via un déclencheur."],
+/* CM3-4 */
+["cm3","Quelles requêtes renvoient les patients dont AllergiesCI est inconnue (NULL) ?",["WHERE AllergiesCI IS NULL","WHERE AllergiesCI = NULL","WHERE AllergiesCI = ''","WHERE NOT (AllergiesCI IS NOT NULL)"],[0,3],"Une comparaison directe avec NULL n'est jamais vraie. NULL n'est pas une chaîne vide."],
+["cm3","Quelles jointures conservent des lignes sans correspondance ?",["INNER JOIN","LEFT OUTER JOIN","RIGHT OUTER JOIN","FULL OUTER JOIN"],[1,2,3],"Seule la jointure interne élimine les tuples sans correspondance."],
+["cm3","Quelles fonctions ignorent les valeurs NULL ?",["COUNT(*)","COUNT(colonne)","SUM(colonne)","AVG(colonne)"],[1,2,3],"COUNT(*) compte toutes les lignes."],
+["cm3","Quelles requêtes donnent de façon fiable les médecins sans prescription ?",["NOT EXISTS avec une sous-requête corrélée","LEFT OUTER JOIN puis WHERE ... IS NULL","NOT IN avec une sous-requête sans NULL","INNER JOIN puis HAVING COUNT(*) = 0"],[0,1,2],"L'INNER JOIN élimine justement les médecins sans prescription : le HAVING ne voit jamais 0."],
+["cm3","Quelles affirmations sont vraies ?",["WHERE filtre les lignes avant le regroupement","HAVING filtre les groupes","HAVING peut contenir COUNT(*)","WHERE peut contenir COUNT(*)"],[0,1,2],"Un agrégat se filtre avec HAVING, jamais avec WHERE."],
+["cm3","Quelles affirmations sont vraies pour GROUP BY ?",["Les attributs du SELECT hors agrégat doivent y figurer","Les NULL sont considérés égaux entre eux","Il remplace la clause WHERE","Il produit un résultat par sous-groupe"],[0,1,3],"Grouper par la clé primaire évite de fusionner des homonymes."],
+["cm3","Quelles affirmations sur les sous-requêtes sont vraies ?",["ANY / SOME : vrai pour au moins un résultat","ALL : vrai pour tous les résultats","EXISTS teste que la sous-requête renvoie au moins une ligne","NOT IN gère toujours correctement les NULL"],[0,1,2],"NOT IN avec un NULL dans la sous-requête ne renvoie aucun résultat."],
+["cm3","Pour enregistrer une consultation d'un nouveau patient, quelles affirmations sont vraies ?",["On insère le patient avant l'hospitalisation","On insère l'hospitalisation avant l'acte","NumActe est généré automatiquement","On relit les identifiants automatiques entre les insertions"],[0,1,3],"NumActe n'est pas automatique : on le renseigne."],
+/* CM5 */
+["cm5","Quelles sont des caractéristiques d'un entrepôt de données selon Inmon ?",["Thématique","Intégré","Volatile","Historisé"],[0,1,3],"Un entrepôt est non volatile : les données ne sont ni écrasées ni supprimées."],
+["cm5","Quelles mesures sont additives sur toutes les dimensions ?",["La quantité vendue","Le montant des ventes","Le solde bancaire","Le pourcentage de marge"],[0,1],"Le solde est semi-additif, le pourcentage est non additif."],
+["cm5","Quelles affirmations sont vraies pour une table de dimension ?",["Elle contient beaucoup de colonnes","Elle contient peu de lignes par rapport à la table de faits","Ses attributs sont surtout descriptifs (texte)","Elle représente environ 90 % du volume de l'entrepôt"],[0,1,2],"Les 90 % du volume sont dans la table de faits."],
+["cm5","Quelles affirmations sont vraies pour une dimension à variation lente de type 2 ?",["On crée une nouvelle ligne","On ajoute des dates de début et de fin","On écrase l'ancienne valeur","L'historique est conservé"],[0,1,3],"L'écrasement est le type 1."],
+["cm5","Quelles affirmations sont vraies pour un schéma en étoile ?",["La table de faits est au centre","Chaque dimension est reliée par une seule jointure","Les hiérarchies sont normalisées sur plusieurs tables","Les requêtes sont simples et rapides"],[0,1,3],"Les hiérarchies normalisées caractérisent le flocon de neige."],
+["cm5","Que contiennent les étapes d'alimentation de l'entrepôt ?",["Staging Area : données brutes, temporaires","ODS : vision opérationnelle récente","3NF : historique complet, normalisé","Cube OLAP : entièrement normalisé et très détaillé"],[0,1,2],"Le cube OLAP est très agrégé et multidimensionnel."],
+["cm5","Quels sont des types de tables de faits pour le stock ?",["Instantané périodique","Instantané de transaction","Instantané récapitulatif","Instantané différé"],[0,1,2],"Périodique : niveaux à intervalle régulier. Transaction : un mouvement par ligne. Récapitulatif : une ligne par réception suivie jusqu'à la sortie."]
+];
+/* QROC : [thème, question, [groupes de mots-clés (synonymes)], réponse modèle, nb de groupes requis (optionnel)] */
+const QROC = [
+["cm1","Quelle est la différence entre une clé primaire et une clé étrangère ? Donne un exemple.",
+ [["uniq"],["identifi"],["reference","pointe","renvoie","valeur de la cle primaire","correspond"],["autre table","table liee","deuxieme table","table differente"]],
+ "La clé primaire identifie chaque ligne d'une table de façon unique et invariable (ex. rpps dans Medecin). La clé étrangère est une colonne qui reprend la valeur de la clé primaire d'une ligne d'une autre table (ex. medecin_id dans Patient) : elle matérialise le lien entre les tables."],
+["cm1","Définis un SGBD.",
+ [["logiciel","application","systeme"],["structur"],["stock","memoris"],["mise a jour","mettre a jour","maj","modifi"],["maintenance","maintien","gere","gestion"]],
+ "Un SGBD (Système de Gestion de Bases de Données) est un logiciel qui prend en charge la structuration, le stockage, la mise à jour et la maintenance d'une base de données (ex. MySQL, PostgreSQL, Oracle, SQLite).",3],
+["cm1","Quand utilise-t-on une classe-association ? Donne un exemple.",
+ [["association"],["propriete","attribut","information","donnee"],["lien","couple","rencontre","entre deux","les deux classes","aucune des deux","ni l une ni l autre","ni a l une ni a l autre"]],
+ "On utilise une classe-association quand une information (propriété) n'appartient ni à l'une ni à l'autre des deux classes mais à leur lien, à leur rencontre. Exemple : la date et la durée d'une Prescription entre un Patient et un Medecin, ou la gravité d'une Allergie."],
+["cm1","Comment traduit-on une association plusieurs-à-plusieurs en modèle relationnel ?",
+ [["plusieurs","n n","n m","0 n","many"],["jonction","intermediaire","supplementaire","nouvelle table","association"],["cle etrangere","fk","cles etrangeres"],["compos","deux cles","concatene"]],
+ "Par une table de jonction : sa clé primaire est composée des deux clés étrangères qui pointent vers chacune des deux tables reliées (ex. LignePrescription(prescription_id, medicament_id), éventuellement avec posologie).",3],
+["cm3","Quelle différence entre un INNER JOIN et un LEFT OUTER JOIN ? Donne un cas où l'INNER JOIN fait perdre de l'information.",
+ [["inner","interne"],["left","gauche","externe","outer"],["sans correspondance","aucune correspondance","pas de correspondance","non correspondant","n ont pas","n a pas","jamais","sans"],["null","conserv","garde"]],
+ "L'INNER JOIN ne garde que les lignes qui ont une correspondance des deux côtés. Le LEFT OUTER JOIN garde toutes les lignes de la table de gauche, complétées par NULL quand il n'y a pas de correspondance. Exemple : INNER JOIN Medecin/Prescription fait disparaître les médecins sans prescription.",3],
+["cm3","Quelle est la différence entre WHERE et HAVING ?",
+ [["where"],["having"],["ligne"],["groupe","agreg","fonction","regroup","group by"]],
+ "WHERE filtre les lignes avant le regroupement ; HAVING filtre les groupes après GROUP BY, sur une condition portant sur une fonction d'agrégat (ex. HAVING COUNT(*) > 10)."],
+["cm3","Pourquoi `WHERE attribut = NULL` ne fonctionne-t-il pas ? Que faut-il écrire ?",
+ [["inconnu","trois valeurs","3 valeurs","unknown","logique"],["is null"],["faux","jamais","toujours","aucune"]],
+ "SQL utilise une logique à trois valeurs (vrai, faux, inconnu) : toute comparaison directe avec NULL n'est jamais vraie. Il faut écrire WHERE attribut IS NULL (ou IS NOT NULL).",2],
+["cm3","Quel piège pose NOT IN avec une sous-requête, et quelle alternative utiliser ?",
+ [["null"],["not exists","exists"],["aucun resultat","aucune ligne","vide","rien","inconnu"]],
+ "Si la sous-requête peut renvoyer NULL, NOT IN ne renvoie aucun résultat, silencieusement. Il faut préférer NOT EXISTS."],
+["cm3","Dans l'étude de cas de facturation, pourquoi additionner plusieurs SUM après des jointures multiples donne-t-il un total faux ? Quelle solution ?",
+ [["jointure","join"],["demultipli","multipli","gonfl","duplic","repete","lignes en double","produit cartesien"],["sous requete","sous requetes","union","separ"]],
+ "Les jointures multiples démultiplient les lignes (un acte × une prescription), donc chaque somme est gonflée avant l'addition. ISNULL ne règle que l'affichage des NULL ; le vrai correctif est d'utiliser des sous-requêtes séparées par type de dépense (comme la requête 1 avec UNION).",2],
+["cm3","À quoi sert une auto-jointure ? Pourquoi écrit-on `prem.nom < sec.nom` ?",
+ [["meme table","une seule table","elle meme","lui meme","soi meme","deux fois"],["alias","renomm"],["doublon","paire","a b","b a","symetri"]],
+ "À croiser des informations au sein d'une même table (ex. paires d'abonnés du même quartier) : la table est renommée deux fois. La condition prem.nom < sec.nom évite les doublons (A,B)/(B,A) et les paires d'une ligne avec elle-même.",2],
+["cm3","Que font ALL et ANY dans une comparaison avec une sous-requête ?",
+ [["all","tous"],["any","some","au moins un","un seul"],["sous requete","resultat"]],
+ "ALL : la condition doit être vraie pour tous les résultats de la sous-requête (ex. <= ALL pour le minimum). ANY / SOME : vraie pour au moins un résultat (ex. < ANY)."],
+["cm2","Compare les moteurs MyISAM et InnoDB en MySQL.",
+ [["myisam"],["innodb"],["cle etrangere","fk","cles etrangeres"],["transaction"]],
+ "MyISAM est rapide en insertion et sélection mais ne gère ni les clés étrangères ni les transactions. InnoDB les gère, avec une récupération automatique après incident ; il faut le préciser en fin de création : ) ENGINE = InnoDB;",3],
+["cm2","Que font ON DELETE RESTRICT, SET NULL et CASCADE ?",
+ [["restrict","no action","avorte","interdit","impossible","bloque","refuse"],["set null","null"],["cascade","repercute","supprime aussi","donnees liees","lignes liees"]],
+ "RESTRICT / NO ACTION : l'action est avortée (impossible de supprimer une ligne référencée). SET NULL : la ligne est conservée mais la référence passe à NULL (incompatible avec NOT NULL). CASCADE : répercute l'action sur toutes les données liées (dangereux)."],
+["cm2","Pourquoi crée-t-on les tables dans un certain ordre ? Quel est l'ordre de suppression ?",
+ [["cle etrangere","fk","reference"],["deja cree","existe","avant","prealable","d abord","au prealable"],["inverse","contraire","en dernier","reference en premier","d abord les tables qui"]],
+ "Une table ne peut référencer par clé étrangère qu'une table déjà créée : on crée d'abord les tables sans dépendance, puis celles qui les référencent. La suppression se fait dans l'ordre inverse (un DROP TABLE échoue si une FK d'une autre table la référence).",2],
+["cm2","Intérêt et inconvénients des index ? Cite des cas où il vaut mieux ne pas indexer.",
+ [["accel","rapid","performance","vitesse","optimis"],["recherche","where","jointure","tri","order by","lecture"],["ralenti","ecriture","mise a jour","modification","insertion","espace","maintenance"],["booleen","peu de valeurs","petite table","souvent modifi","peu de lignes"]],
+ "Un index accélère les recherches (WHERE), les tris (ORDER BY, GROUP BY) et les jointures, mais ralentit les écritures car il est mis à jour à chaque modification. À éviter sur les colonnes souvent modifiées, à peu de valeurs distinctes (booléen) et sur les petites tables.",3],
+["cm2","Pourquoi `CHECK (date <= NOW())` est-il refusé par MySQL ? Comment contrôler la règle ?",
+ [["non determin","determin","varie","change"],["now","fonction"],["trigger","declencheur","application"]],
+ "NOW() est une fonction non déterministe (son résultat change à chaque appel) : MySQL l'interdit dans un CHECK. Le contrôle se fait au niveau de l'application ou via un déclencheur (trigger).",2],
+["cm2","Qu'est-ce qu'une vue ? Qu'est-ce qu'une table dérivée ?",
+ [["vue"],["virtuelle","definition"],["derivee"],["insert into","select","stock","independant"]],
+ "Une vue est une table virtuelle : seule sa définition est stockée, pas les données. Une table dérivée est créée par INSERT INTO ... SELECT : elle est stockée, indépendante de la table d'origine, sans propagation des mises à jour.",3],
+["cm5","Cite les quatre caractéristiques d'un entrepôt de données selon Bill Inmon et explique-en une avec un exemple.",
+ [["thematique"],["integre"],["non volatile","volatile"],["historis"]],
+ "Données thématiques (approche métier), intégrées (référentiel unique), non volatiles (jamais réécrites ni supprimées), historisées (datées, chargées en continu). Exemple : deux sources codent le sexe différemment, l'entrepôt les unifie dans un référentiel unique."],
+["cm5","Quel est le rôle de l'ETL ? Cite les étapes intermédiaires.",
+ [["extract","extrai","extrait"],["transform","transforme"],["load","charge"],["staging","ods","3nf"]],
+ "ETL = Extract, Transform, Load : il extrait les données des applications sources, les transforme et les charge dans l'entrepôt. Elles transitent par des étapes intermédiaires (Staging, ODS, 3NF).",3],
+["cm5","Différence entre table de faits et table de dimension ?",
+ [["fait"],["dimension"],["mesure","quantitative","numerique","chiffre"],["descri","qualitative","texte","attribut"]],
+ "La table de faits stocke les mesures numériques (quantité, montant) et les clés étrangères vers les dimensions ; elle a beaucoup de lignes et peu de colonnes. Les dimensions contiennent des attributs descriptifs (texte), avec peu de lignes et beaucoup de colonnes."],
+["cm5","Compare le schéma en étoile et le schéma en flocon de neige.",
+ [["etoile"],["flocon"],["normalis"],["jointure","redondan","performance","simple"]],
+ "Étoile : une table de faits entourée de dimensions dénormalisées, information hiérarchique redondante mais requêtes simples et rapides. Flocon de neige : les hiérarchies sont normalisées en plusieurs tables, moins de redondance mais plus de jointures.",3],
+["cm5","Quelle différence entre une dimension à variation lente de type 1 et de type 2 ?",
+ [["type 1","ecras","remplace"],["type 2","nouvelle ligne","trace","historique","conserv","garde"],["date","debut","fin","periode"]],
+ "Type 1 : on écrase l'ancienne valeur, l'analyse ne voit que la dernière (le changement n'intéresse pas le métier). Type 2 : on trace l'ancienne valeur avec une nouvelle ligne et des dates de début et de fin, utile quand le métier veut analyser selon la valeur en vigueur à la date de la mesure.",2],
+["cm5","Quels sont les trois types de tables de faits (exemple du stock) ?",
+ [["periodique"],["transaction"],["recapitulatif"],["stock","intervalle","mouvement","etape"]],
+ "Instantané périodique : niveaux de stock à intervalle régulier. Instantané de transaction : chaque mouvement est une ligne. Instantané récapitulatif : une ligne par réception, suivie à chaque étape jusqu'à la sortie.",3],
+["cm5","Quelles sont les 4 étapes de la modélisation dimensionnelle ?",
+ [["processus"],["grain","granularite"],["dimension"],["fait","mesure"]],
+ "1) Sélection du processus d'entreprise à modéliser, 2) déclaration du grain, 3) choix des dimensions, 4) identification des faits."]
+];
+
+/* Exercices de code. kind : fill (trous [[réponse|variante]]), fix (corriger, mots-clés) */
+const CODE = [
+{t:"cm2",kind:"fill",title:"Créer une table avec contraintes",
+ intro:"La table Consultation a une clé primaire auto-incrémentée, un tarif à 2 décimales (jusqu'à 9999,99) valant 25,00 par défaut, et une clé étrangère nommée fk_patient vers Patient. Un patient ayant des consultations ne doit pas pouvoir être supprimé.",
+ code:`CREATE TABLE Consultation (
+    id_consultation INT [[AUTO_INCREMENT]] PRIMARY KEY,
+    date_consultation DATETIME,
+    tarif [[DECIMAL]](6,2) [[DEFAULT]] 25.00,
+    patient_id INT,
+    [[CONSTRAINT]] fk_patient [[FOREIGN KEY]] (patient_id)
+        [[REFERENCES]] Patient(id_patient)
+        ON DELETE [[RESTRICT|NO ACTION]]
+) ENGINE = [[InnoDB]];`,
+ expl:"AUTO_INCREMENT pour l'identifiant, DECIMAL(6,2) pour l'argent (exact), DEFAULT pour 25.00, CONSTRAINT nom FOREIGN KEY ... REFERENCES, RESTRICT pour interdire la suppression, InnoDB pour gérer les FK."},
+{t:"cm3",kind:"fill",title:"Compter et filtrer des groupes",
+ intro:"Afficher, pour chaque service, le nombre d'hospitalisations, en ne gardant que les services de plus de 10 hospitalisations, du plus chargé au moins chargé.",
+ code:`SELECT S.Nomserv, [[COUNT]](H.NumDossier) AS nbHospit
+FROM Hospitalisation H
+[[INNER JOIN|JOIN]] LitService LS ON H.NumLit = LS.NumLit
+INNER JOIN Service S ON LS.numserv = S.numserv
+GROUP BY [[S.Nomserv]]
+[[HAVING]] COUNT(H.NumDossier) > 10
+ORDER BY nbHospit [[DESC]];`,
+ expl:"COUNT pour compter, GROUP BY sur l'attribut non agrégé, HAVING pour filtrer les groupes (WHERE ne peut pas porter sur COUNT), ORDER BY ... DESC pour le plus chargé d'abord."},
+{t:"cm3",kind:"fix",title:"Corriger une requête",
+ intro:"On veut le nom et le prénom des médecins qui n'ont fait aucune prescription. Voici la requête d'un étudiant. Repère les erreurs et propose une version correcte (en français ou en SQL).",
+ code:`SELECT Nom, Prénom, COUNT(*)
+FROM Medecin M
+INNER JOIN Prescription P ON M.NumMed = P.NumMed
+WHERE COUNT(*) = 0;`,
+ kw:[["having","agregat","where"],["inner join","jointure interne","elimine","perd","sans prescription"],["group by","regroup"],["not exists","left","not in","is null"]],need:3,
+ model:`Erreurs : une fonction d'agrégat ne se filtre pas dans WHERE (HAVING) ; l'INNER JOIN élimine justement les médecins sans prescription ; on mélange colonnes et agrégat sans GROUP BY. Version correcte :
+SELECT DISTINCT Nom, Prénom FROM Medecin M
+WHERE NOT EXISTS (SELECT 1 FROM Prescription P WHERE P.NumMed = M.NumMed);`,
+ expl:"On cherche une absence : NOT EXISTS, NOT IN (sans NULL) ou LEFT OUTER JOIN ... WHERE P.Numpres IS NULL."},
+{t:"cm2",kind:"fill",title:"Faire évoluer une structure avec ALTER TABLE",
+ intro:"Complète les instructions MySQL.",
+ code:`ALTER TABLE Patient [[ADD|ADD COLUMN]] telephone VARCHAR(15);
+ALTER TABLE Patient [[MODIFY|MODIFY COLUMN]] nom VARCHAR(80);
+ALTER TABLE Patient [[DROP COLUMN|DROP]] telephone;
+ALTER TABLE Consultation ADD [[CONSTRAINT]] fk_medecin
+    FOREIGN KEY (medecin_id) [[REFERENCES]] Medecin(id_medecin);
+ALTER TABLE Consultation DROP [[FOREIGN KEY]] fk_medecin;`,
+ expl:"ADD ajoute, MODIFY change le type, DROP COLUMN supprime une colonne, DROP FOREIGN KEY supprime la contrainte nommée."},
+{t:"cm1",kind:"fill",title:"Table de jonction",
+ intro:"Prescription et Medicament sont en relation plusieurs-à-plusieurs. Complète la table de jonction (clé primaire composée des deux clés étrangères).",
+ code:`CREATE TABLE LignePrescription (
+    prescription_id INTEGER,
+    medicament_id VARCHAR(15),
+    posologie VARCHAR(100),
+    [[PRIMARY KEY]] ([[prescription_id]], [[medicament_id]]),
+    FOREIGN KEY (prescription_id) [[REFERENCES]] Prescription([[idPrescription]]),
+    FOREIGN KEY (medicament_id) REFERENCES Medicament([[codeCIP]])
+) ENGINE = InnoDB;`,
+ expl:"La PK composée est formée des deux FK ; chaque FK référence la clé primaire de sa table. posologie est un attribut propre au lien."},
+{t:"cm2",kind:"fix",title:"Corriger une séquence de créations",
+ intro:"Ce script échoue. Repère au moins trois erreurs et explique comment le corriger.",
+ code:`CREATE TABLE Prescription (
+    idPrescription INTEGER PRIMARY KEY,
+    patient_id INTEGER,
+    medecin_id VARCHAR(15),
+    FOREIGN KEY (patient_id) REFERENCES Patient(numSecu),
+    FOREIGN KEY (medecin_id) REFERENCES Medecin(rpps)
+);
+CREATE TABLE Patient (numSecu VARCHAR(15) PRIMARY KEY, nom VARCHAR(50));
+CREATE TABLE Medecin (rpps VARCHAR(15) PRIMARY KEY, nom VARCHAR(50));`,
+ kw:[["type","varchar","integer"],["ordre","avant","deja cree","apres","d abord"],["innodb","engine"]],need:3,
+ model:"1) patient_id est INTEGER alors que Patient.numSecu est VARCHAR(15) : une FK doit avoir exactement le même type. 2) Prescription est créée avant Patient et Medecin qu'elle référence : il faut créer d'abord Patient et Medecin. 3) Il manque ENGINE = InnoDB, sans lequel MySQL ne gère pas les clés étrangères.",
+ expl:"Trois pièges classiques du TD2 : type de FK, ordre de création, moteur InnoDB."},
+{t:"cm3",kind:"fill",title:"Interroger une table",
+ intro:"Table Patient (id_patient, nom, prenom, ville, date_naissance). Complète les trois requêtes.",
+ code:`-- Patients de Lyon, triés par nom
+SELECT * FROM Patient WHERE ville = [['Lyon']] [[ORDER BY]] nom;
+-- Patients dont le nom commence par M
+SELECT * FROM Patient WHERE nom [[LIKE]] [['M%']];
+-- Les trois patients nés le plus récemment
+SELECT * FROM Patient ORDER BY date_naissance [[DESC]] [[LIMIT 3]];`,
+ expl:"LIKE 'M%' pour un début de chaîne ; les plus récents = date la plus grande, donc tri décroissant puis LIMIT 3."},
+{t:"cm3",kind:"fill",title:"Compter avec une jointure externe",
+ intro:"Tables Patient (id_patient, nom) et Consultation (id_consult, id_patient, id_medecin, date_consult). Lister tous les patients, y compris ceux sans consultation, avec leur nombre de consultations (0 si aucune).",
+ code:`SELECT p.nom, COUNT([[c.id_consult]]) AS nbConsult
+FROM Patient p
+[[LEFT OUTER JOIN|LEFT JOIN]] Consultation c ON p.id_patient = c.id_patient
+[[GROUP BY]] p.id_patient, p.nom;`,
+ expl:"COUNT(c.id_consult) ignore les NULL et donne 0 pour un patient sans consultation (COUNT(*) donnerait 1). On groupe par la clé primaire."},
+{t:"cm3",kind:"fix",title:"Corriger un INSERT",
+ intro:"id_patient est AUTO_INCREMENT. Cette instruction contient deux erreurs. Lesquelles ?",
+ code:`INSERT INTO Patient (id_patient, nom, prenom, date_naissance)
+VALUES (NULL, Doe, John, 1990-04-12);`,
+ kw:[["quote","guillemet","apostrophe","texte"],["auto_increment","auto increment","automatique","id_patient","lister","genere"]],need:2,
+ model:"1) Le texte et la date doivent être entre quotes simples : 'Doe', 'John', '1990-04-12'. 2) La colonne AUTO_INCREMENT ne se liste pas : MySQL la génère. Version correcte : INSERT INTO Patient (nom, prenom, date_naissance) VALUES ('Doe', 'John', '1990-04-12');",
+ expl:"Texte et dates entre quotes simples ; colonne AUTO_INCREMENT laissée à MySQL."},
+{t:"cm3",kind:"fill",title:"Médecins sans consultation",
+ intro:"Lister les médecins n'ayant reçu aucune consultation depuis le 1er janvier 2026, à l'aide d'une sous-requête.",
+ code:`SELECT m.nom FROM Medecin m
+WHERE [[NOT EXISTS]] (
+    SELECT * FROM Consultation c
+    WHERE c.id_medecin = [[m.id_medecin]]
+    AND c.date_consult >= [['2026-01-01']]
+);`,
+ expl:"Sous-requête corrélée : elle référence m.id_medecin de la requête externe. NOT EXISTS teste l'absence de ligne."},
+{t:"cm2",kind:"fill",title:"Créer et supprimer des index",
+ intro:"Complète avec les types d'index MySQL.",
+ code:`ALTER TABLE Consultation ADD [[INDEX]] idx_patient (patient_id);
+ALTER TABLE Medecin ADD [[UNIQUE]] idx_adeli (numero_adeli);
+ALTER TABLE Consultation ADD [[FULLTEXT]] idx_cr (compte_rendu);
+ALTER TABLE Consultation DROP [[INDEX]] idx_patient;
+SELECT * FROM Consultation
+WHERE [[MATCH]](compte_rendu) [[AGAINST]]('douleur thoracique');`,
+ expl:"INDEX secondaire, UNIQUE pour garantir l'unicité, FULLTEXT + MATCH ... AGAINST pour le texte intégral."},
+{t:"cm3",kind:"fix",title:"Corriger une jointure",
+ intro:"On veut le nombre de prescriptions par médecin. Cette requête renvoie un résultat faux. Pourquoi ?",
+ code:`SELECT m.nom, COUNT(pr.idPrescription)
+FROM Medecin m, Prescription pr
+GROUP BY m.nom;`,
+ kw:[["condition","jointure","cartesien","medecin_id","cle etrangere","where"],["cle primaire","rpps","homonym"]],need:2,
+ model:"1) Il manque la condition de jointure WHERE pr.medecin_id = m.rpps : sans elle on obtient un produit cartésien. 2) Il faut grouper par la clé primaire (m.rpps, m.nom) : deux médecins homonymes seraient sinon comptés ensemble.",
+ expl:"Pour relier N tables il faut N-1 conditions d'égalité sur les clés étrangères."},
+{t:"cm3",kind:"fill",title:"Sous-requêtes IN, ALL et ANY",
+ intro:"Complète avec l'opérateur adapté.",
+ code:`-- Médicaments prescrits au moins une fois
+SELECT * FROM Medicament
+WHERE Designation [[IN]] (SELECT Designation FROM Prescription);
+-- Abonné ayant fait l'emprunt le plus court
+SELECT nom FROM abonnes a INNER JOIN emprunt e ON a.num = e.num
+WHERE e.duree <= [[ALL]] (SELECT duree FROM emprunt);
+-- Opéras moins chers qu'au moins un classique
+SELECT titre FROM catalogue WHERE genre = 'opera'
+AND prix < [[ANY|SOME]] (SELECT prix FROM catalogue WHERE genre = 'classique');`,
+ expl:"IN pour l'appartenance, <= ALL pour un minimum, < ANY pour « moins cher qu'au moins un »."},
+{t:"cm3",kind:"fill",title:"Ordre des insertions",
+ intro:"Pour enregistrer une consultation pour un nouveau patient, on dispose de trois instructions : (a) INSERT INTO Actes, (b) INSERT INTO Patient, (c) INSERT INTO Hospitalisation. Donne l'ordre d'exécution (lettres séparées par des virgules).",
+ code:`Ordre correct : [[b,c,a|b c a|bca|b-c-a|b, c, a]]`,
+ expl:"Patient d'abord, puis son hospitalisation (avec l'idPatient généré), puis l'acte (avec le NumDossier généré). On relit les identifiants automatiques entre deux insertions."},
+{t:"cm5",kind:"fill",title:"Requête sur un schéma en étoile",
+ intro:"Table de faits VentesJournalieres(cle_date, cle_produit, cle_magasin, quantite_vendue, montant_ventes), dimensions DimProduit(cle_produit, categorie, famille) et DimDate(cle_date, annee). Total des ventes 2026 par catégorie de produit.",
+ code:`SELECT p.categorie, [[SUM]](f.montant_ventes) AS ca
+FROM VentesJournalieres f
+INNER JOIN DimProduit p ON f.cle_produit = [[p.cle_produit]]
+INNER JOIN DimDate d ON f.cle_date = d.cle_date
+WHERE d.annee = [[2026]]
+[[GROUP BY]] p.categorie;`,
+ expl:"Une jointure par dimension, puis GROUP BY sur l'attribut de hiérarchie voulu : c'est ainsi qu'on « remonte » la hiérarchie."},
+{t:"cm3",kind:"fill",title:"Mettre à jour, insérer, supprimer",
+ intro:"Table Etudiant (id_etudiant, nom, prenom, moyenne).",
+ code:`[[INSERT INTO]] Etudiant (id_etudiant, nom, prenom, moyenne)
+[[VALUES]] (101, 'DUPONT', 'Martin', 14.5);
+[[UPDATE]] Etudiant [[SET]] moyenne = 15.2 [[WHERE]] id_etudiant = 101;
+[[DELETE FROM]] Etudiant WHERE moyenne < 8;`,
+ expl:"Avant un DELETE ou un UPDATE, vérifier la condition avec un SELECT : sans WHERE, toutes les lignes sont touchées."},
+{t:"cm2",kind:"fix",title:"Corriger une suppression de tables",
+ intro:"La table Consultation référence Patient et Medecin par des clés étrangères. Ce script échoue. Pourquoi, et comment le corriger ?",
+ code:`DROP TABLE Patient;
+DROP TABLE Medecin;
+DROP TABLE Consultation;`,
+ kw:[["cle etrangere","fk","reference"],["inverse","ordre","avant","d abord","en premier","premier"]],need:2,
+ model:"Patient et Medecin sont référencées par les clés étrangères de Consultation : un DROP TABLE échoue tant qu'une FK les référence. Il faut supprimer d'abord Consultation, puis Patient et Medecin (ordre inverse de la création).",
+ expl:"On supprime les tables qui référencent avant les tables référencées."},
+{t:"cm1",kind:"fill",title:"Créer deux tables avec contraintes",
+ intro:"Adherent : email unique et obligatoire. Livre : ISBN unique, champ disponible vrai par défaut.",
+ code:`CREATE TABLE Adherent (
+    id_adherent INT PRIMARY KEY,
+    nom VARCHAR(50),
+    prenom VARCHAR(50),
+    email VARCHAR(100) [[UNIQUE]] [[NOT NULL]],
+    date_inscription DATE
+);
+CREATE TABLE Livre (
+    id_livre INT PRIMARY KEY,
+    titre VARCHAR(200),
+    isbn VARCHAR(13) UNIQUE,
+    disponible [[BOOLEAN|BOOL]] [[DEFAULT]] [[TRUE]]
+);`,
+ expl:"Un booléen suffit pour disponible (deux états). UNIQUE + NOT NULL pour un champ obligatoire et sans doublon."},
+{t:"cm3",kind:"fill",title:"Calculer un âge",
+ intro:"Afficher le nom, le prénom et l'âge des patients seniors (plus de 60 ans), en syntaxe SQL Server comme dans le cours.",
+ code:`SELECT Nom, Prénom,
+    [[datediff]](yy, DateNaiss, [[getdate]]()) AS Age
+FROM Patient
+WHERE datediff(yy, DateNaiss, getdate()) [[>]] 60;`,
+ expl:"datediff(format, date1, date2) donne la différence date2 - date1 dans l'unité choisie (yy = années) ; getdate() est la date système."},
+{t:"cm2",kind:"fill",title:"Table d'examens avec règles de suppression",
+ intro:"Un examen d'imagerie est lié à un patient et à un radiologue. On ne doit pas pouvoir supprimer un patient qui a des examens, mais le départ d'un radiologue doit conserver l'historique (la colonne passe à NULL).",
+ code:`CREATE TABLE Examen (
+    idExamen INT [[AUTO_INCREMENT]] PRIMARY KEY,
+    dateExamen [[DATETIME]],
+    urgence BOOLEAN DEFAULT FALSE,
+    patient_id VARCHAR(15),
+    radiologue_id VARCHAR(11),
+    FOREIGN KEY (patient_id) REFERENCES Patient(numSecu)
+        ON DELETE [[RESTRICT]],
+    FOREIGN KEY (radiologue_id) REFERENCES Radiologue(numeroAdeli)
+        ON DELETE [[SET NULL]]
+) ENGINE = [[InnoDB]];`,
+ expl:"DATETIME garde la date choisie (TIMESTAMP serait réécrit). SET NULL est possible parce que radiologue_id n'a pas de contrainte NOT NULL."}
+];
+const CHAPS = {
+  cm1:"CM1 · Modélisation et relationnel",
+  cm2:"CM2 · SQL avec MySQL",
+  cm3:"CM3-4 · Interroger les données",
+  cm5:"CM5 · Entrepôt de données"
+};
+
+/* [chapitre, terme, définition] */
+const DEFS = [
+["cm1","Base de données","Ensemble de données numériques structurées et organisées, pour être facilement consultées, mises à jour et gérées par un logiciel (le SGBD). Née à la fin des années 1960 pour combler les lacunes des systèmes de fichiers."],
+["cm1","SGBD (DBMS)","Système de Gestion de Bases de Données : logiciel qui prend en charge la structuration, le stockage, la mise à jour et la maintenance d'une base. Exemples : Oracle, PostgreSQL, MySQL, SQLite."],
+["cm1","Fonctions d'une base de données","Stocker l'information de façon fiable, traiter de grands volumes, traiter rapidement, sécuriser les accès, contrôler la qualité, partager les données, les rendre accessibles en réseau."],
+["cm1","SGBD relationnel","Les données sont représentées dans des tableaux (tables) pouvant être liés entre eux. Exemples : MySQL, PostgreSQL, Oracle."],
+["cm1","SGBD NoSQL","Données organisées dans d'autres structures que le tableau : clé-valeur, orienté graphe, orienté document. Clé-valeur : un dictionnaire qui associe à chaque clé une valeur."],
+["cm1","Application de base de données","Programme construit sur une base (réservations d'une compagnie aérienne, horaires...) : une base seule n'est exploitable que par des informaticiens et des applications."],
+["cm1","Classe","Type abstrait caractérisé par des propriétés (attributs et méthodes) communes à un ensemble d'objets ; permet de créer des instances ayant ces propriétés."],
+["cm1","Instance (objet)","Objet concret créé à partir d'une classe, avec des valeurs concrètes. Notation : nomObjet : NomClasse (souligné)."],
+["cm1","Attribut","Information élémentaire qui caractérise une classe ; sa valeur dépend de l'objet. Il est typé (domaine fixé a priori) et peut être annoté {clé}."],
+["cm1","Méthode","Opération (comportement) que les objets d'une classe peuvent exécuter : vérifier un état, mettre à jour une valeur, récupérer une information (isSick(), getDoctor())."],
+["cm1","UML","Unified Modeling Language : langage de représentation pour la modélisation objet. Il impose de « penser objet » et reste indépendant du langage de programmation."],
+["cm1","Diagramme de classes","Sous-ensemble d'UML décrivant la structure statique d'un système : classes, propriétés et relations. Le plus utilisé pour préparer une base de données."],
+["cm1","Table (relation)","Organise les données en lignes et colonnes ; correspond aux classes de la programmation objet. Une table ne contient que des objets du même type."],
+["cm1","Ligne, colonne, cellule","Ligne (tuple) = un objet. Colonne = une propriété commune à tous les objets. Cellule = une donnée, c'est-à-dire la propriété d'un objet."],
+["cm1","Domaine","Ensemble des valeurs qu'une propriété peut prendre (entier, texte, booléen, date...). Chaque colonne est associée à un domaine fixé a priori."],
+["cm1","UML → relationnel","Classe → table ; attribut → colonne ; objet (instance) → ligne."],
+["cm1","Conventions de nommage UML","Classes : singulier, sans accent, majuscule initiale, PascalCase (MaladieHereditaire). Attributs : singulier, sans accent, minuscule initiale, camelCase (couleurPlaque)."],
+["cm1","Association","Relation entre deux classes (ou plus) qui définit des liens entre leurs objets. Elle est nommée, en général par un verbe, et peut avoir des propriétés."],
+["cm1","Cardinalité","Nombre minimum et maximum d'instances autorisées à participer à la relation, dans les deux sens. Notation min..max ; n ou * si le maximum est indéterminé."],
+["cm1","Multiplicités usuelles","0..1 aucune ou une · 1 (1..1) exactement une · 0..* aucune, une ou plusieurs · 1..* au moins une · x..x exactement x · m..n au moins m et au plus n."],
+["cm1","Classe-association","Permet d'ajouter des propriétés à l'association elle-même (Maladie, Don, Allergie, Prescription). Trait pointillé au milieu de l'association. Réflexe : l'information appartient-elle à A, à B ou à leur rencontre ?"],
+["cm1","Clé primaire (PK)","Attribut qui identifie chaque tuple de façon unique. Elle doit être unique et invariable : aucun doublon possible dans la colonne."],
+["cm1","Choisir une clé primaire","Se demander : est-ce unique pour toujours ? invariable ? deux personnes peuvent-elles partager la valeur ? toujours connue à la création ? Nom/prénom : mauvaise clé. Sinon : identifiant technique."],
+["cm1","Clé étrangère (FK)","Attribut qui référence la clé primaire d'un tuple d'une autre table. Sa valeur est celle de la clé primaire du tuple lié : c'est ce qui matérialise le lien."],
+["cm1","Association 1-N","La clé étrangère se place du côté « N » (ex. Medecin_id dans Patient)."],
+["cm1","Table de jonction","Pour une association plusieurs-à-plusieurs : table dédiée dont la clé primaire est composée des deux clés étrangères vers les tables reliées. Elle peut porter des attributs du lien (posologie)."],
+["cm1","Jointure (principe)","Suit les clés étrangères pour reconstituer à la volée l'information répartie entre plusieurs tables."],
+["cm1","SQL","Structured Query Language : langage standardisé, déclaratif, implémenté par tous les SGBD relationnels. Définir (LDD), contrôler (LCD), manipuler (LMD)."],
+["cm1","MySQL","Le plus utilisé (WordPress, Facebook, Instagram), gratuit (MariaDB) mais permissif : il ne suit pas toujours la syntaxe SQL et peut laisser passer des erreurs."],
+["cm1","Oracle Database","SGBD des grandes entreprises (Samsung), très cher, licence fermée, utile pour de très gros volumes, en perte de vitesse face à MariaDB et PostgreSQL."],
+["cm1","PostgreSQL","Open-source, le plus fidèle aux recommandations SQL et le plus rapide des quatre (Spotify). Longtemps cantonné au monde Linux."],
+["cm1","SQLite","Toute la base dans un seul fichier, très simple à configurer, adapté au développement local et au prototypage (apps Android), peu adapté aux gros volumes."],
+
+["cm2","Quatre types de tables SQL","Tables de base (stockées sur disque) · résultats de requêtes SFW (volatiles) · tables dérivées (INSERT INTO ... SELECT) · vues (virtuelles : seule la définition est stockée)."],
+["cm2","CREATE, ALTER, DROP","Création, modification, suppression de tables. Un DROP TABLE échoue si une clé étrangère d'une autre table référence la table."],
+["cm2","Entiers MySQL","TINYINT 1 octet (256 valeurs) · SMALLINT 2 (65 536) · MEDIUMINT 3 (16 777 216) · INT 4 (4 294 967 296, le plus utilisé) · BIGINT 8 octets."],
+["cm2","AUTO_INCREMENT","Génération automatique : prend la valeur maximum + 1 à chaque INSERT. Une seule colonne par table, de type entier. On ne la liste pas dans l'INSERT."],
+["cm2","Décimaux","FLOAT, DOUBLE : valeurs approchées. DECIMAL(M,D) : exact, M chiffres au total dont D après la virgule. DECIMAL(6,2) va jusqu'à 9999,99. À utiliser pour l'argent."],
+["cm2","Types de dates","DATE, DATETIME, TIMESTAMP. TIMESTAMP se met à jour automatiquement avec la date courante : pratique pour dater une modification, inadapté à une date métier."],
+["cm2","CHAR et VARCHAR","CHAR(X) : taille fixe, complétée par des blancs. VARCHAR(X) : taille variable. Insensibles à la casse dans un WHERE ; l'attribut BINARY les rend sensibles."],
+["cm2","Textes longs","TINYTEXT 255 · TEXT 65 535 · MEDIUMTEXT 16 777 215 · LONGTEXT plus de 4 milliards de caractères. BLOB : texte, image ou son, sensible à la casse."],
+["cm2","ENUM et SET","ENUM('v1','v2',...) : une seule valeur de la liste. SET : un ensemble de valeurs, ou NULL. Une valeur hors liste est remplacée silencieusement (chaîne vide ou NULL)."],
+["cm2","Pièges des types MySQL","Débordement d'entier : valeur la plus proche (13265 dans un TINYINT → 127). Arrondi au-delà de la précision d'un décimal. Chaînes trop longues tronquées sans erreur."],
+["cm2","Fonctions de dates MySQL","CURRENT_DATE(), CURRENT_TIME(), PERIOD_DIFF(D1,D2) (mois), DAYOFWEEK (1 = dimanche), DAYOFMONTH, DAYOFYEAR, YEAR, MONTH, DAYNAME, MONTHNAME, QUARTER, WEEK, HOUR, MINUTE, SECOND."],
+["cm2","Fonctions de chaînes MySQL","UPPER, LOWER, CONCAT, LEFT / RIGHT, LENGTH, LTRIM / RTRIM, REPLACE, SUBSTRING(chaîne, début[, longueur])."],
+["cm2","Opérateurs","Arithmétiques : parenthèses, puis * et /, puis + et - ; division par 0 = NULL. Logiques : AND, OR, NOT. Comparaison : = != <> < <= > >= ; <=> (égalité avec NULL), IS NULL, BETWEEN, IN, COALESCE (première valeur non NULL)."],
+["cm2","Contraintes","NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY ... REFERENCES, CHECK, DEFAULT, AUTO_INCREMENT. Ce sont des règles de gestion au niveau des colonnes, à écrire explicitement."],
+["cm2","NOT NULL et DEFAULT","Pas d'entrée : si NULL autorisé → NULL (ou valeur par défaut) ; si NULL interdit → erreur (ou valeur par défaut). Valeur NULL saisie : NULL, ou erreur si NOT NULL."],
+["cm2","Clé primaire en SQL","UNIQUE + NOT NULL, une seule par table. Trois écritures : en ligne, en fin de définition PRIMARY KEY (col), ou après coup avec ALTER TABLE ... ADD PRIMARY KEY."],
+["cm2","Clé étrangère en SQL","Vérifie l'intégrité référentielle ; exige InnoDB ; même type exact que la colonne référencée ; clé composite possible. Définition isolée : CONSTRAINT nom FOREIGN KEY (col) REFERENCES T(col)."],
+["cm2","ON DELETE / ON UPDATE","RESTRICT ou NO ACTION (équivalents) : action avortée. SET NULL : garde la ligne, perd la référence (incompatible avec NOT NULL). CASCADE : répercute sur les données liées, dangereux."],
+["cm2","Moteurs de tables","MyISAM : rapide, sans clés étrangères ni transactions. InnoDB : clés étrangères, transactions, récupération après incident. Se précise en fin de création : ) ENGINE = InnoDB;"],
+["cm2","Conventions de nommage SQL","Mots-clés en MAJUSCULES, tables et colonnes en minuscules. Préfixes : pk_ clé primaire, fk_ clé étrangère, ck_ CHECK, un_ unicité. Nommer une contrainte facilite sa suppression."],
+["cm2","Types d'intégrité","Domaine (types, ENUM) · référentielle (clés étrangères) · temporelle (évolution et ordre des données)."],
+["cm2","ALTER TABLE","Ajoute ou supprime une colonne ou une contrainte, modifie une colonne, une valeur par défaut, les index. En MySQL : ADD, DROP COLUMN, MODIFY (type), CHANGE (nom + type), DROP FOREIGN KEY."],
+["cm2","Alimenter les tables","INSERT INTO T (colonnes) VALUES (...). Respecter l'ordre des dépendances. Texte et dates entre quotes simples. Table dérivée : INSERT INTO T2 SELECT * FROM T WHERE ... (indépendante de l'originale)."],
+["cm2","Index","Structure d'accès rapide (arbre) qui accélère WHERE, ORDER BY / GROUP BY et JOIN. Mis à jour automatiquement, transparent. Ralentit les écritures. Plus il y en a, moins ils sont utiles."],
+["cm2","Types d'index","Primaire (clé primaire, un seul) · secondaire (colonne quelconque, plusieurs) · UNIQUE (garantit l'unicité) · FULLTEXT (texte intégral : MATCH ... AGAINST)."],
+["cm2","Quand indexer ?","À faire : clés étrangères à accès fréquent, colonnes de jointure, tri, agrégat, index multicolonnes. À éviter : colonnes souvent modifiées, peu de valeurs distinctes (booléen), petites tables. Limites : 32 index par table, 16 colonnes par index."],
+["cm2","CHECK","Contrainte de condition sur une colonne. Pas de fonction non déterministe (NOW()). Réellement appliquée seulement depuis MySQL 8.0.16, ignorée silencieusement avant."],
+
+["cm3","SGBD et langage de manipulation","Un SGBD fournit un LMD pour interroger et modifier les données : usage conversationnel direct, ou intégré dans un langage hôte (C, Java) pour des transactions programmées."],
+["cm3","Les quatre familles de SQL","LDD définition des données · LMD manipulation · LCD contrôle · LID interrogation. L'algèbre relationnelle repose sur sélection, projection et jointure."],
+["cm3","SELECT FROM WHERE (SFW)","SELECT [ALL | DISTINCT] attributs ou * FROM table WHERE condition. ALL (défaut) garde les doublons, DISTINCT les élimine, * sélectionne toutes les colonnes."],
+["cm3","Projection et sélection","Projection : choisir des colonnes (SELECT). Sélection : choisir des lignes (WHERE)."],
+["cm3","NULL et logique à trois valeurs","Vrai, faux, inconnu. Toute comparaison directe avec NULL est fausse : utiliser IS NULL / IS NOT NULL. NULL n'est pas une chaîne vide. AND : inconnu sauf opérande faux. OR : inconnu sauf opérande vrai."],
+["cm3","LIKE","Comparaison de chaînes. % : chaîne quelconque (0 ou plus). _ : un caractère quelconque. Ex. LIKE 'M%'."],
+["cm3","ORDER BY","Trie selon un ou plusieurs attributs, ASC ou DESC. Le premier critère domine, les suivants départagent."],
+["cm3","Fonctions d'agrégat","COUNT, SUM, AVG, MAX, MIN. Ignorent les NULL, sauf COUNT(*) qui compte toutes les lignes. COUNT(DISTINCT x) compte les valeurs distinctes."],
+["cm3","GROUP BY","Un résultat par sous-groupe. Tous les attributs du SELECT hors fonction doivent être dans le GROUP BY. Les NULL sont considérés égaux. Grouper par la clé primaire, pas par le nom seul."],
+["cm3","HAVING","Filtre sur un résultat agrégé (conditions sur les fonctions), après GROUP BY. WHERE filtre les lignes avant le regroupement."],
+["cm3","Fonctions de dates (cours)","getdate() date système · datepart(format, date) · datediff(format, d1, d2) = d2 - d1 · dateadd(format, n, date). Formats : yy, qq, mm, dy, dd, dw, hh, mi, ss, ms."],
+["cm3","Jointure","Produit cartésien, puis sélection (condition de jointure), puis projection. Les attributs de jointure ont le même domaine. Deux syntaxes : implicite (FROM A, B WHERE ...) et explicite INNER JOIN ... ON (recommandée)."],
+["cm3","Jointure interne et externe","Interne (INNER JOIN) : élimine les tuples sans correspondance. Externe : LEFT / RIGHT OUTER JOIN conservent les lignes de la première / deuxième table, FULL OUTER JOIN les deux, complétées par NULL."],
+["cm3","Auto-jointure","Croiser une table avec elle-même : elle est renommée deux fois (alias). La condition prem.nom < sec.nom évite les doublons (A,B)/(B,A) et les paires avec soi-même."],
+["cm3","UNION","Regroupe les résultats de plusieurs requêtes qui ont les mêmes attributs (renommés si besoin)."],
+["cm3","IN et NOT IN","Teste l'appartenance (ou l'absence) à un ensemble ; peut remplacer une jointure. Piège : si la sous-requête contient des NULL, NOT IN ne renvoie rien. Préférer NOT EXISTS."],
+["cm3","EXISTS et NOT EXISTS","Testent si une sous-requête renvoie au moins une ligne (ou aucune). La sous-requête référence souvent la requête externe."],
+["cm3","ALL et ANY / SOME","ALL : condition vraie pour tous les résultats de la sous-requête (<= ALL = minimum). ANY / SOME : vraie pour au moins un résultat."],
+["cm3","UPDATE","UPDATE table SET attribut = valeur [, ...] WHERE condition. Sans WHERE, toutes les lignes sont modifiées. round(nb, décimales) arrondit."],
+["cm3","INSERT et DELETE","INSERT INTO table (colonnes) VALUES (...). Les attributs en numérotation automatique sont ignorés. DELETE FROM table WHERE condition."],
+["cm3","Insérer une consultation (hôpital)","Ordre : Patient → Hospitalisation → Actes. Relire les identifiants automatiques (idPatient, NumDossier) entre les insertions. NumActe n'est pas automatique."],
+["cm3","Facturation : le piège des agrégats","Plusieurs jointures multiplient les lignes (acte × prescription) : additionner des SUM donne un total faux. ISNULL(x, 0) sécurise l'affichage des NULL. Le vrai correctif : sous-requêtes séparées par type de dépense, avec UNION."],
+
+["cm5","Entrepôt de données (Inmon, 1992)","Collection de données thématiques, intégrées, non volatiles et historisées pour la prise de décision."],
+["cm5","But de l'entrepôt","Présenter les informations utiles aussi simplement que possible, afficher les résultats aussi vite que possible, fournir des informations pertinentes en ligne avec les processus de l'entreprise."],
+["cm5","Données thématiques","Approche « métier » et non « outil » : organisation par sujets (client, produit...)."],
+["cm5","Données intégrées","Uniformiser les données : définir un référentiel unique (ex. un seul codage du sexe malgré des sources différentes)."],
+["cm5","Données non volatiles","Traçabilité : la valeur d'un indicateur sur une période ne change pas, les données ne sont pas supprimées. Le mois de juillet s'ajoute à côté de juin."],
+["cm5","Données historisées","Chargement continu, données datées et associées à un référentiel temps. Un déménagement est historisé, pas écrasé."],
+["cm5","Opérationnel vs décisionnel","Opérationnel : orienté application, détaillé, mis à jour par les utilisateurs, accès unitaire. Décisionnel : orienté activité, condensé, historique, sans mise à jour interactive, utilisé par les analystes, peut être redondant."],
+["cm5","Environnement décisionnel et ETL","Applications sources → ETL (Extract, Transform, Load) avec Staging, ODS, 3NF → présentation (DWH / DM, cube) → accès (reporting). Les métadonnées couvrent l'ensemble."],
+["cm5","Staging, ODS, 3NF","Staging : données brutes, temporaires. ODS : vision opérationnelle récente, historique très court. 3NF : historique complet, intègre, entièrement normalisé."],
+["cm5","DWH, Data Mart, cube OLAP","DWH : global (toute l'entreprise), très détaillé. Data Mart : local (un département), partiellement agrégé. Cube OLAP : un besoin d'analyse précis, très agrégé, ultra-rapide, structure multidimensionnelle."],
+["cm5","Métadonnées","Informations sur les données de l'entrepôt : provenance, structure, règles de transformation, audit des chargements, fréquence, règles de gestion. Indispensables."],
+["cm5","Cycle de vie (Kimball)","Planification, analyse des besoins métier, puis trois voies parallèles : technique (architecture, outils), données (modélisation dimensionnelle puis physique), applicatif (spécification, développement BI), puis déploiement, maintenance et évolutions."],
+["cm5","Table de faits","Table principale d'un modèle multidimensionnel : stocke les mesures de performance, à l'intersection de toutes les dimensions. Beaucoup de lignes, peu de colonnes, environ 90 % du volume."],
+["cm5","Types de mesures","Additives : sommables sur toutes les dimensions (quantité, montant). Semi-additives : sommables sur certaines dimensions (solde bancaire, pas dans le temps). Non additives : ratio, pourcentage."],
+["cm5","Granularité (grain)","La liste des dimensions définit le grain de la table de faits. Toutes les lignes sont au même grain."],
+["cm5","Table de dimension","Point d'entrée dans la table de faits. Attributs descriptifs, surtout du texte. Beaucoup de colonnes, peu de lignes. Chaque dimension a une clé primaire."],
+["cm5","Clés fait / dimension","Une table de faits a au moins deux clés étrangères vers les clés primaires des dimensions (relation plusieurs-à-plusieurs). Intégrité référentielle. Clé primaire composite en général."],
+["cm5","Schéma en étoile","Table de faits au centre entourée de ses dimensions, chacune reliée par une seule jointure. Information hiérarchique redondante, mais requêtes simples et rapides."],
+["cm5","Hiérarchies","Les niveaux d'une dimension forment une hiérarchie (Produit → Catégorie → Famille). Permet d'analyser à différents niveaux de détail ; en SQL on « remonte » avec GROUP BY."],
+["cm5","Hiérarchies parallèles","Une même dimension peut porter plusieurs hiérarchies distinctes et valides en parallèle (famille / grande famille et marque)."],
+["cm5","Terminologie des hiérarchies","Ancêtres et descendants · parents, enfants, siblings (frères) · génération (racine = génération 1) · niveau · membres ou positions."],
+["cm5","Hypercube","Chaque cellule est un croisement précis des dimensions. Trancher (slice) : fixer une dimension pour obtenir un tableau à 2 axes. Pivoter (dice) : changer les dimensions affichées en lignes et colonnes."],
+["cm5","Instantané périodique","Mesure à intervalle régulier (jour, semaine, mois) des niveaux de stock, sur des lignes distinctes. Le modèle le plus courant. Clés : date, produit, entrepôt ; mesure : quantité disponible."],
+["cm5","Instantané de transaction","Chaque transaction (réception, transfert, envoi, retour) est une ligne de la table de faits. Clés : date, produit, entrepôt, transaction ; mesure : quantité de la transaction."],
+["cm5","Instantané récapitulatif","Le stock passe par des étapes (réception, mise en stock, prélèvement, emballage, expédition). Une ligne par réception de produit, suivie jusqu'à sa sortie, avec plusieurs clés de date."],
+["cm5","Tables d'agrégats","Tables de faits agrégées (ventes par jour, par mois, par année) pour améliorer les performances d'une base relationnelle."],
+["cm5","Dimensions à variation lente (SCD)","Certains attributs d'une dimension changent dans le temps (adresse, statut marital). Il faut définir le type de chaque attribut lors de l'étude du besoin."],
+["cm5","SCD type 1, 2 et 3","Type 1 : on écrase l'ancienne valeur (le métier s'en moque). Type 2 : on trace l'ancienne valeur, nouvelle ligne avec dates de début et de fin. Type 3 (peu utilisé) : colonne « ancienne valeur », seule la version précédente est gardée."],
+["cm5","Dimension agrégée","Dimension créée à partir d'une dimension existante quand la granularité des tables de faits diffère (ex. dimension Catégorie issue de Produit)."],
+["cm5","Schéma en flocon de neige","Les hiérarchies sont normalisées : chaque niveau devient sa propre table. Plus de jointures, aucune redondance. Le cours donne priorité à la simplicité (étoile)."],
+["cm5","Les 4 étapes de modélisation","1 Sélection du processus d'entreprise · 2 Déclaration du grain · 3 Choix des dimensions · 4 Identification des faits. Guidées par les besoins de l'activité et les données réelles."]
+];
+
+/* Syntaxes à connaître */
+const SNIPS = [
+["Créer une table (MySQL)",`CREATE TABLE Consultation (
+    id_consultation INT AUTO_INCREMENT PRIMARY KEY,
+    date_consultation DATETIME,
+    tarif DECIMAL(6,2) DEFAULT 25.00,
+    patient_id INT NOT NULL,
+    CONSTRAINT fk_patient FOREIGN KEY (patient_id)
+        REFERENCES Patient(id_patient)
+        ON DELETE RESTRICT
+) ENGINE = InnoDB;`],
+["Clé primaire composée (table de jonction)",`CREATE TABLE LignePrescription (
+    prescription_id INTEGER,
+    medicament_id VARCHAR(15),
+    posologie VARCHAR(100),
+    PRIMARY KEY (prescription_id, medicament_id),
+    FOREIGN KEY (prescription_id) REFERENCES Prescription(idPrescription),
+    FOREIGN KEY (medicament_id) REFERENCES Medicament(codeCIP)
+) ENGINE = InnoDB;`],
+["ALTER TABLE",`ALTER TABLE Patient ADD adresse VARCHAR(100);
+ALTER TABLE Patient DROP COLUMN adresse;
+ALTER TABLE Patient MODIFY COLUMN nom VARCHAR(80);
+ALTER TABLE Patient CHANGE telephone tel_portable VARCHAR(15);
+ALTER TABLE Consultation ALTER COLUMN tarif SET DEFAULT 25.00;
+ALTER TABLE Patient ADD PRIMARY KEY (id_patient);
+ALTER TABLE Consultation ADD CONSTRAINT fk_medecin
+    FOREIGN KEY (medecin_id) REFERENCES Medecin(id_medecin);
+ALTER TABLE Consultation DROP FOREIGN KEY fk_medecin;`],
+["Index",`CREATE TABLE Consultation (..., INDEX idx_patient (patient_id));
+ALTER TABLE Consultation ADD INDEX idx_patient (patient_id);
+ALTER TABLE Medecin ADD UNIQUE idx_adeli (numero_adeli);
+ALTER TABLE Consultation ADD FULLTEXT idx_cr (compte_rendu);
+ALTER TABLE Consultation DROP INDEX idx_patient;
+SELECT * FROM Consultation
+WHERE MATCH(compte_rendu) AGAINST('douleur thoracique');`],
+["INSERT, UPDATE, DELETE",`INSERT INTO Patient (nom, prenom, date_naissance)
+VALUES ('Doe', 'John', '1990-04-12');   -- id AUTO_INCREMENT non listé
+UPDATE Medicament SET PrixDose = round(0.95 * PrixDose, 2)
+WHERE Indication LIKE 'antalgi%';
+DELETE FROM Etudiant WHERE moyenne < 8;
+-- table dérivée
+INSERT INTO ConsultationArchive
+SELECT * FROM Consultation WHERE date_consultation < '2020-01-01';`],
+["Structure complète d'une requête",`SELECT DISTINCT attribut(s) ou fonction(s) AS titre
+FROM nom-table
+INNER JOIN nom-table2 ON att1 = att2
+WHERE condition
+AND condition
+GROUP BY attribut(s)
+HAVING condition sur une fonction
+ORDER BY attribut(s) ASC | DESC;`],
+["Jointures",`-- explicite (recommandée)
+SELECT p.nom, m.nom
+FROM Prescription pr
+INNER JOIN Patient p ON pr.patient_id = p.numSecu
+INNER JOIN Medecin m ON pr.medecin_id = m.rpps
+WHERE pr.idPrescription = 1;
+
+-- externe : garder tous les patients
+SELECT p.nom, COUNT(c.id_consult) AS nb
+FROM Patient p
+LEFT OUTER JOIN Consultation c ON p.id_patient = c.id_patient
+GROUP BY p.id_patient, p.nom;
+
+-- auto-jointure
+SELECT prem.nom, sec.nom
+FROM abonnes prem
+INNER JOIN abonnes sec ON prem.quartier = sec.quartier
+WHERE prem.nom < sec.nom;`],
+["Sous-requêtes et UNION",`SELECT * FROM Medicament
+WHERE Designation IN (SELECT Designation FROM Prescription);
+
+SELECT Nom FROM Medecin M
+WHERE NOT EXISTS (SELECT 1 FROM Prescription P WHERE P.NumMed = M.NumMed);
+
+WHERE e.duree <= ALL (SELECT duree FROM emprunt)
+WHERE prix < ANY (SELECT prix FROM catalogue WHERE genre = 'classique')
+
+SELECT Nom, Prénom FROM Patient ... UNION SELECT Nom, Prénom FROM Patient ...;`],
+["Agrégats",`SELECT Sexe, COUNT(idPatient) FROM Patient GROUP BY Sexe;
+SELECT COUNT(DISTINCT specialite) FROM Medecin;
+SELECT Designation, AVG(Duree) AS Moyenne_Duree
+FROM Prescription
+GROUP BY Designation
+HAVING AVG(Duree) > 6;`],
+["Dates (syntaxe du cours)",`SELECT Nom, Prénom, datediff(yy, DateNaiss, getdate()) AS Age
+FROM Patient
+WHERE datediff(yy, DateNaiss, getdate()) > 60;`],
+["Requête sur un schéma en étoile",`SELECT p.categorie, SUM(f.montant_ventes) AS ca
+FROM VentesJournalieres f
+INNER JOIN DimProduit p ON f.cle_produit = p.cle_produit
+INNER JOIN DimDate d ON f.cle_date = d.cle_date
+WHERE d.annee = 2026
+GROUP BY p.categorie;`]
+];
+
+/* Pièges fréquents */
+const TRAPS = [
+["Table de jonction pour une classe-association","Elle porte déjà ses clés étrangères. La jonction sert à un plusieurs-à-plusieurs sans classe-association."],
+["Clé étrangère d'un type différent","Même type exactement que la colonne référencée."],
+["CREATE TABLE dans le désordre","D'abord les tables référencées. Suppression dans l'ordre inverse."],
+["Oublier ENGINE = InnoDB","Sans lui, MySQL ne gère pas les clés étrangères."],
+["Lister une colonne AUTO_INCREMENT dans un INSERT","La laisser générer par MySQL, puis la relire."],
+["Texte ou date sans quotes","Quotes simples : '2026-03-10'."],
+["= NULL","Écrire IS NULL ou IS NOT NULL."],
+["COUNT(*) dans un WHERE","Filtrer un agrégat avec HAVING."],
+["INNER JOIN quand on veut tout garder","LEFT OUTER JOIN pour conserver les lignes sans correspondance."],
+["GROUP BY nom seul","Grouper par la clé primaire : les homonymes seraient comptés ensemble."],
+["Jointure sans condition sur les FK","Une égalité par clé étrangère, sinon produit cartésien. N tables : N-1 conditions."],
+["NOT IN avec des NULL","Aucun résultat, silencieusement. Préférer NOT EXISTS."],
+["Additionner des SUM après plusieurs jointures","Total faux : lignes démultipliées. Sous-requêtes par type de dépense."],
+["CASCADE par réflexe","Préférer RESTRICT sauf besoin précis."],
+["CHECK avec NOW()","Interdit (non déterministe), et ignoré avant MySQL 8.0.16."],
+["TINYINT qui déborde","MySQL stocke la valeur la plus proche (13265 → 127) sans erreur."],
+["TIMESTAMP pour une date métier","Il se met à jour tout seul : utiliser DATETIME."],
+["Index sur tout","Plus ils sont nombreux, moins ils sont utiles ; ils ralentissent les écritures."]
+];
+
+const METHODE = [
+"Souligne les noms de l'énoncé : ce sont les classes candidates, avec leurs attributs.",
+"Repère les identifiants uniques (numéro de sécu, RPPS, code CIP) : ce sont les clés. Sinon, crée un id.",
+"Relie les classes par des associations nommées, avec les cardinalités des deux côtés.",
+"Une information qui dépend de deux classes à la fois : classe-association.",
+"Passe au relationnel : FK côté N pour un 1-N, table de jonction pour un N-N sans classe-association.",
+"Écris les CREATE TABLE dans l'ordre des dépendances, puis les INSERT dans le même ordre.",
+"Pour chaque requête : quelles tables, quelles FK les relient, quel filtre.",
+"Relis : types des FK, quotes, ordre, noms."
+];
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')};
+var fmt=function(s){return esc(s).replace(/`([^`]+)`/g,'<code>$1</code>')};
+var norm=function(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim()};
+var fnorm=function(s){return String(s).toLowerCase().replace(/"/g,"'").replace(/\s+/g,' ').replace(/\s*([(),=<>])\s*/g,'$1').replace(/;\s*$/,'').trim()};
+var num=function(x){var r=Math.round(x*10)/10;return String(r).replace('.',',')};
+var half=function(x){return String(Math.round(x*2)/2).replace('.',',')};
+
+var LS={
+  get:function(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  del:function(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+var PFX='bddx2-';
+var W={qcm:8,qroc:6,code:6};
+var TOPIC={cm1:'CM1 · Modélisation et relationnel',cm2:'CM2 · SQL avec MySQL',cm3:'CM3-4 · Interroger les données',cm5:'CM5 · Entrepôt de données'};
+
+var ROUTES=[{id:'revisions',label:'Fiche de révision'},
+  {id:'examen-1',label:'Examen 1',n:1},{id:'examen-2',label:'Examen 2',n:2},
+  {id:'examen-3',label:'Examen 3',n:3},{id:'examen-4',label:'Examen 4',n:4},
+  {id:'tirage-aleatoire',label:'Tirage aléatoire',n:0}];
+
+function range(n){var r=[];for(var i=0;i<n;i++)r.push(i);return r}
+function shuffle(a){var r=a.slice();for(var i=r.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=r[i];r[i]=r[j];r[j]=t}return r}
+
+var QALL=QCM.map(function(q){return {t:q[0],q:q[1],o:[q[2]].concat(q[3]),c:[0],e:q[4]}}).concat(QM.map(function(q){return {t:q[0],q:q[1],o:q[2],c:q[3],e:q[4]}}));
+var NOLD=QCM.length;
+
+/* ---------- parsing des exercices de code ---------- */
+var PARSED={};
+function parseCode(i){
+  if(PARSED[i])return PARSED[i];
+  var it=CODE[i],parts=[],blanks=[];
+  if(it.kind==='fill'){
+    it.code.split(/(\[\[[\s\S]*?\]\])/).forEach(function(tok){
+      var m=tok.match(/^\[\[([\s\S]*?)\]\]$/);
+      if(m){var alts=m[1].split('|');parts.push({b:blanks.length,alts:alts});blanks.push(alts)}
+      else if(tok)parts.push({t:tok});
+    });
+  }
+  PARSED[i]={parts:parts,blanks:blanks};
+  return PARSED[i];
+}
+
+/* ---------- examens ---------- */
+var exams={};
+function build(r){
+  var ex,oldIdx=range(NOLD),newIdx=range(QM.length).map(function(i){return NOLD+i});
+  if(r.n>0){
+    var k=r.n-1,f=function(a){return a.filter(function(_,i){return i%4===k})};
+    ex={qcm:shuffle(f(oldIdx).slice(0,12).concat(f(newIdx))),qroc:f(range(QROC.length)),code:f(range(CODE.length))};
+  }else{
+    ex={qcm:shuffle(shuffle(oldIdx).slice(0,13).concat(shuffle(newIdx).slice(0,7))),qroc:shuffle(range(QROC.length)).slice(0,6),code:shuffle(range(CODE.length)).slice(0,5)};
+  }
+  ex.order={};ex.qcm.forEach(function(i){ex.order[i]=shuffle(range(QALL[i].o.length))});
+  ex.ans={};ex.done=false;ex.res=null;
+  return ex;
+}
+function getExam(r){
+  if(exams[r.id])return exams[r.id];
+  var s=LS.get(PFX+r.id);
+  if(!s||!s.qcm)s=build(r);
+  exams[r.id]=s;return s;
+}
+function save(r){LS.set(PFX+r.id,exams[r.id])}
+
+/* ---------- correction ---------- */
+function grade(ex){
+  var res={m:{},r:{},c:{},topics:{}};
+  var bad=function(t,x){res.topics[t]=(res.topics[t]||0)+x};
+  var mSum=0;
+  ex.qcm.forEach(function(i){
+    var q=QALL[i],T=ex.ans['m'+i]||[],right=0,wrong=0;
+    T.forEach(function(x){if(q.c.indexOf(x)>=0)right++;else wrong++});
+    var frac=Math.max(0,(right-wrong)/q.c.length);
+    res.m[i]={frac:frac,ok:right===q.c.length&&wrong===0};
+    mSum+=frac;if(frac<1)bad(q.t,1-frac);
+  });
+  var rOk=0;
+  ex.qroc.forEach(function(i){
+    var q=QROC[i],txt=norm(ex.ans['r'+i]||''),hits=q[2].map(function(g){return g.some(function(k){return txt.indexOf(norm(k))>=0})});
+    var need=q[4]||q[2].length,n=hits.filter(Boolean).length,ok=n>=need;
+    res.r[i]={ok:ok,hits:hits};if(ok)rOk++;else bad(q[0],1);
+  });
+  var cSum=0;
+  ex.code.forEach(function(i){
+    var it=CODE[i],frac=0,detail;
+    if(it.kind==='fill'){
+      var p=parseCode(i),arr=ex.ans['c'+i]||[],oks=p.blanks.map(function(alts,b){
+        var v=fnorm(arr[b]||'');return v!==''&&alts.some(function(a){return fnorm(a)===v})});
+      frac=oks.filter(Boolean).length/oks.length;detail={oks:oks};
+    }else{
+      var txt=norm(ex.ans['c'+i]||''),hits=it.kw.map(function(g){return g.some(function(k){return txt.indexOf(norm(k))>=0})});
+      var n=hits.filter(Boolean).length;frac=n/it.kw.length;detail={hits:hits,ok:n>=(it.need||it.kw.length)};
+      if(detail.ok)frac=1;
+    }
+    detail.frac=frac;res.c[i]=detail;cSum+=frac;if(frac<1)bad(it.t,1-frac);
+  });
+  res.qcm=mSum/ex.qcm.length*W.qcm;
+  res.qroc=rOk/ex.qroc.length*W.qroc;
+  res.code=cSum/ex.code.length*W.code;
+  res.total=res.qcm+res.qroc+res.code;
+  return res;
+}
+
+/* ---------- vue examen ---------- */
+var cur=null;
+function introText(r){
+  return r.n>0
+   ? "Examen blanc n° "+r.n+". Les questions sont différentes de celles des trois autres examens."
+   : "Tirage aléatoire : 20 QCM, 6 QROC et 5 exercices de code piochés dans toute la banque. Chaque tirage est nouveau.";
+}
+function renderExam(r){
+  var ex=getExam(r),res=ex.done?ex.res:null,h='';
+  if(res)h+=copieHtml(ex,res);
+  h+='<section class="intro"><h2>'+(r.n>0?r.label:'Tirage aléatoire')+'</h2><p>'+introText(r)+'</p>'
+   +'<div class="chips"><span class="chip">'+ex.qcm.length+' QCM</span><span class="chip">'+ex.qroc.length+' QROC</span><span class="chip">'+ex.code.length+' exercices de code</span><span class="chip">1 h 30 conseillée</span><span class="chip">/ 20</span></div>'
+   +'<ul class="rules"><li>Réponds sans le cours, puis clique sur <b>Finir</b> : tout est corrigé d\'un coup.</li>'
+   +'<li>QCM : une ou plusieurs réponses exactes par question, comme au concours. Chaque bonne case cochée rapporte, chaque mauvaise case cochée en retire, sans descendre sous 0 par question.</li>'
+   +'<li>QROC : corrigés par mots-clés. Si les termes attendus ne sont pas dans ta réponse, elle est comptée fausse.</li>'
+   +'<li>Code : un trou est juste si ta réponse est identique à la mienne (majuscules et espaces ignorés). Les exercices « corriger » se notent aussi aux mots-clés.</li></ul></section>';
+  h+='<div class="part"><h3>1. QCM</h3><span class="pts">'+W.qcm+' pts · une ou plusieurs bonnes réponses par question</span></div>';
+  ex.qcm.forEach(function(i,n){h+=qcmHtml(ex,i,n+1,res)});
+  h+='<div class="part"><h3>2. QROC</h3><span class="pts">'+W.qroc+' pts · réponds en 2 à 5 lignes avec le vocabulaire du cours</span></div>';
+  ex.qroc.forEach(function(i,n){h+=qrocHtml(ex,i,n+1,res)});
+  h+='<div class="part"><h3>3. Code SQL</h3><span class="pts">'+W.code+' pts · compléter ou corriger</span></div>';
+  ex.code.forEach(function(i,n){h+=codeHtml(ex,i,n+1,res)});
+  h+='<div class="bar" id="bar"><div class="prog"><div class="lbl" id="plbl"></div><div class="meter"><i id="pbar"></i></div></div>'
+   +(ex.done?'':'<button class="btn" data-act="finish">Finir et corriger</button>')
+   +'<button class="btn ghost" data-act="reset">'+(r.n>0?'Recommencer':'Nouveau tirage')+'</button><div class="warnmsg" id="warn" hidden></div></div>';
+  $('#app').innerHTML=h;
+  progress(ex);
+}
+function markHtml(kind){
+  var t=kind==='ok'?'✓ juste':kind==='mid'?'~ partiel':'✗ faux';
+  return '<span class="mark '+(kind==='ok'?'ok':kind==='mid'?'mid':'ko')+'">'+t+'</span>';
+}
+function qcmHtml(ex,i,n,res){
+  var q=QALL[i],ch=ex.ans['m'+i]||[],ord=ex.order[i],done=!!res,r=done?res.m[i]:null;
+  var h='<article class="q'+(done?' done':'')+'"><div class="qhead"><span class="qn">Q'+n+'</span><span class="qt">'+TOPIC[q.t].split(' · ')[0]+'</span></div>'
+   +(done?markHtml(r.ok?'ok':r.frac>0?'mid':'ko'):'')+'<p class="qq">'+fmt(q.q)+'</p><div class="opts">';
+  ord.forEach(function(orig,pos){
+    var isC=q.c.indexOf(orig)>=0,on=ch.indexOf(orig)>=0,cls='opt',tag='';
+    if(done){if(isC){cls+=' good';if(!on)tag=' <span class="ans">à cocher</span>'}else if(on)cls+=' wrong'}
+    h+='<label class="'+cls+'"><input type="checkbox" data-k="m'+i+'" value="'+orig+'"'+(on?' checked':'')+(done?' disabled':'')+'><span class="ltr">'+'ABCDE'[pos]+'</span><span class="txt">'+fmt(q.o[orig])+tag+'</span></label>';
+  });
+  h+='</div>';
+  if(done)h+='<p class="fb"><b>À retenir :</b> '+fmt(q.e)+'</p>';
+  return h+'</article>';
+}
+function qrocHtml(ex,i,n,res){
+  var q=QROC[i],done=!!res,v=ex.ans['r'+i]||'';
+  var h='<article class="q'+(done?' done':'')+'"><div class="qhead"><span class="qn">R'+n+'</span><span class="qt">'+TOPIC[q[0]].split(' · ')[0]+'</span></div>'
+   +(done?markHtml(res.r[i].ok?'ok':'ko'):'')+'<p class="qq">'+fmt(q[1])+'</p>'
+   +'<textarea data-k="r'+i+'" aria-label="Réponse" placeholder="Écris ta réponse ici"'+(done?' readonly':'')+'>'+esc(v)+'</textarea>';
+  if(done){
+    var r=res.r[i];
+    h+='<div class="kws">'+q[2].map(function(g,j){return '<span class="kw '+(r.hits[j]?'y':'n')+'">'+esc(g[0])+'</span>'}).join('')+'</div>'
+     +'<p class="fb">'+(r.ok?'Tous les termes attendus sont présents.':'Il manque des termes attendus (barrés ci-dessus).')+'</p>'
+     +'<div class="model"><b>Réponse modèle</b>'+esc(q[3])+'</div>';
+  }
+  return h+'</article>';
+}
+function codeHtml(ex,i,n,res){
+  var it=CODE[i],done=!!res,d=done?res.c[i]:null;
+  var kind=!done?null:(d.frac>=1?'ok':d.frac>0?'mid':'ko');
+  var h='<article class="q'+(done?' done':'')+'"><div class="qhead"><span class="qn">C'+n+'</span><span class="qt">'+TOPIC[it.t].split(' · ')[0]+' · '+(it.kind==='fill'?'compléter':'corriger')+'</span></div>'
+   +(done?markHtml(kind):'')+'<p class="qq">'+esc(it.title)+'</p><p class="codeintro">'+fmt(it.intro)+'</p>';
+  if(it.kind==='fill'){
+    var p=parseCode(i),arr=ex.ans['c'+i]||[];
+    h+='<pre class="code">'+p.parts.map(function(pt){
+      if(pt.t!==undefined)return esc(pt.t);
+      var w=Math.max.apply(null,pt.alts.map(function(a){return a.length}))+2;
+      var cls='blank'+(done?(d.oks[pt.b]?' ok':' ko'):'');
+      var s='<input class="'+cls+'" type="text" data-k="c'+i+'" data-b="'+pt.b+'" style="width:'+w+'ch" value="'+esc(arr[pt.b]||'')+'" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Trou '+(pt.b+1)+'"'+(done?' readonly':'')+'>';
+      if(done&&!d.oks[pt.b])s+='<span class="ans">'+esc(pt.alts[0])+'</span>';
+      return s;
+    }).join('')+'</pre>';
+    if(done)h+='<p class="fb"><b>À retenir :</b> '+fmt(it.expl)+'</p>';
+  }else{
+    h+='<pre class="code">'+esc(it.code)+'</pre><div style="height:10px"></div>'
+     +'<textarea data-k="c'+i+'" aria-label="Ta correction" placeholder="Explique les erreurs et propose une version correcte"'+(done?' readonly':'')+'>'+esc(ex.ans['c'+i]||'')+'</textarea>';
+    if(done){
+      h+='<div class="kws">'+it.kw.map(function(g,j){return '<span class="kw '+(d.hits[j]?'y':'n')+'">'+esc(g[0])+'</span>'}).join('')+'</div>'
+       +'<div class="model"><b>Correction</b>'+esc(it.model)+'</div><p class="fb"><b>À retenir :</b> '+fmt(it.expl)+'</p>';
+    }
+  }
+  return h+'</article>';
+}
+function copieHtml(ex,res){
+  var rows=[['QCM',res.qcm,W.qcm],['QROC',res.qroc,W.qroc],['Code',res.code,W.code]];
+  var t=Object.keys(res.topics).filter(function(k){return res.topics[k]>=0.5}).sort(function(a,b){return res.topics[b]-res.topics[a]});
+  var h='<section class="copie" id="copie"><div class="note">'+half(res.total)+'<small> / 20</small></div><div><h2>Copie corrigée</h2>'
+   +'<div class="rows">'+rows.map(function(r){return '<div class="row"><span>'+r[0]+'</span><div class="meter"><i style="width:'+Math.round(r[1]/r[2]*100)+'%"></i></div><span class="v">'+num(r[1])+' / '+r[2]+'</span></div>'}).join('')+'</div>';
+  if(t.length)h+='<div class="redo"><b>À retravailler :</b><ul>'+t.map(function(k){return '<li>'+TOPIC[k]+'</li>'}).join('')+'</ul><p><a href="#revisions">Ouvrir la fiche de révision</a></p></div>';
+  else h+='<p class="redo">Aucune erreur. Passe à un autre examen ou lance un tirage aléatoire.</p>';
+  return h+'</div></section>';
+}
+function answered(ex){
+  var a=0,t=ex.qcm.length+ex.qroc.length+ex.code.length;
+  ex.qcm.forEach(function(i){var v=ex.ans['m'+i];if(v&&v.length)a++});
+  ex.qroc.forEach(function(i){if((ex.ans['r'+i]||'').trim())a++});
+  ex.code.forEach(function(i){var v=ex.ans['c'+i];if(Array.isArray(v)?v.some(function(x){return x&&x.trim()}):(v||'').trim())a++});
+  return [a,t];
+}
+function progress(ex){
+  var p=answered(ex),l=$('#plbl'),b=$('#pbar');
+  if(!l)return;
+  l.textContent=ex.done?'Copie corrigée':p[0]+' sur '+p[1]+' questions commencées';
+  b.style.width=(ex.done?100:Math.round(p[0]/p[1]*100))+'%';
+}
+
+/* ---------- fiche de révision ---------- */
+var rev={chap:'all',q:'',hide:false};
+function renderRev(){
+  var chips=[['all','Tout'],['cm1','CM1'],['cm2','CM2'],['cm3','CM3-4'],['cm5','CM5'],['syn','Syntaxes'],['trap','Pièges et méthode']];
+  $('#app').innerHTML='<section class="intro"><h2>Fiche de révision</h2><p>'+DEFS.length+' définitions, les syntaxes SQL à connaître et les pièges classiques. Active le mode test pour cacher les définitions et te les réciter avant de cliquer.</p></section>'
+   +'<div class="tools"><input class="search" id="rsearch" type="search" placeholder="Chercher un terme (ex. HAVING, clé étrangère, SCD)" value="'+esc(rev.q)+'" aria-label="Chercher"><label class="toggle"><input type="checkbox" id="rhide"'+(rev.hide?' checked':'')+'> Mode test</label></div>'
+   +'<div class="fchips" id="rchips">'+chips.map(function(c){return '<button class="fc" data-chap="'+c[0]+'" aria-pressed="'+(rev.chap===c[0])+'">'+c[1]+'</button>'}).join('')+'</div><div id="rlist"></div>';
+  drawRev();
+}
+function drawRev(){
+  var q=norm(rev.q),h='',any=false,hasQ=function(s){return !q||norm(s).indexOf(q)>=0};
+  Object.keys(CHAPS).forEach(function(c){
+    if(rev.chap!=='all'&&rev.chap!==c)return;
+    var items=DEFS.filter(function(d){return d[0]===c&&hasQ(d[1]+' '+d[2])});
+    if(!items.length)return;any=true;
+    h+='<h3 class="chaphead">'+CHAPS[c]+'<small>'+items.length+' fiches</small></h3><div class="defs">'+items.map(function(d){return '<article class="def"><h4>'+esc(d[1])+'</h4><p>'+esc(d[2])+'</p></article>'}).join('')+'</div>';
+  });
+  if(rev.chap==='all'||rev.chap==='syn'){
+    var sn=SNIPS.filter(function(s){return hasQ(s[0]+' '+s[1])});
+    if(sn.length){any=true;h+='<h3 class="chaphead">Syntaxes SQL<small>'+sn.length+' blocs</small></h3><div class="snips">'+sn.map(function(s){return '<details class="snip"'+(q?' open':'')+'><summary>'+esc(s[0])+'</summary><pre><code>'+esc(s[1])+'</code></pre></details>'}).join('')+'</div>'}
+  }
+  if(rev.chap==='all'||rev.chap==='trap'){
+    var tr=TRAPS.filter(function(s){return hasQ(s[0]+' '+s[1])});
+    if(tr.length){any=true;h+='<h3 class="chaphead">Pièges fréquents<small>'+tr.length+'</small></h3><div class="traps">'+tr.map(function(s){return '<div class="trap"><b>'+esc(s[0])+'</b>'+esc(s[1])+'</div>'}).join('')+'</div>'}
+    if(!q){any=true;h+='<h3 class="chaphead">Méthode en 8 étapes</h3><ol class="steps">'+METHODE.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ol>'}
+  }
+  if(!any)h='<p class="empty">Aucun résultat pour « '+esc(rev.q)+' ».</p>';
+  var el=$('#rlist');el.className=rev.hide?'hidemode':'';el.innerHTML=h;
+}
+
+/* ---------- navigation ---------- */
+function tabs(){
+  var cur_=curRoute().id;
+  $('#tabs').innerHTML=ROUTES.map(function(r){
+    var tick='';
+    if(r.n!==undefined){var s=LS.get(PFX+r.id);if(s&&s.done&&s.res)tick='<span class="tick">'+half(s.res.total)+'</span>'}
+    return '<button class="tab" role="tab" data-route="'+r.id+'" aria-selected="'+(r.id===cur_)+'">'+r.label+tick+'</button>';
+  }).join('');
+}
+function curRoute(){
+  var h=(location.hash||'').replace('#','');
+  for(var i=0;i<ROUTES.length;i++)if(ROUTES[i].id===h)return ROUTES[i];
+  return ROUTES[0];
+}
+function route(){
+  cur=curRoute();tabs();
+  if(cur.n===undefined)renderRev();else renderExam(cur);
+  window.scrollTo(0,0);
+}
+
+/* ---------- événements ---------- */
+var app=$('#app');
+app.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.matches('#rsearch')){rev.q=t.value;drawRev();return}
+  if(t.type==='checkbox'||t.type==='radio')return;
+  var k=t.getAttribute('data-k');if(!k||!cur||cur.n===undefined)return;
+  var ex=exams[cur.id];if(!ex||ex.done)return;
+  if(t.classList.contains('blank')){var a=ex.ans[k]||[];a[+t.getAttribute('data-b')]=t.value;ex.ans[k]=a}
+  else ex.ans[k]=t.value;
+  save(cur);progress(ex);
+});
+app.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.matches('#rhide')){rev.hide=t.checked;drawRev();return}
+  if(t.type==='checkbox'&&/^m/.test(t.getAttribute('data-k')||'')){
+    var ex=exams[cur.id];if(!ex||ex.done)return;
+    var k=t.getAttribute('data-k'),a=ex.ans[k]||[],v=+t.value,ix=a.indexOf(v);
+    if(t.checked&&ix<0)a.push(v);if(!t.checked&&ix>=0)a.splice(ix,1);
+    ex.ans[k]=a;save(cur);progress(ex);
+  }
+});
+app.addEventListener('click',function(e){
+  var t=e.target.closest('button,.def');if(!t)return;
+  if(t.classList.contains('fc')){rev.chap=t.getAttribute('data-chap');
+    [].forEach.call(document.querySelectorAll('.fc'),function(b){b.setAttribute('aria-pressed',String(b===t))});drawRev();return}
+  if(t.classList.contains('def')){if($('#rlist').classList.contains('hidemode'))t.classList.toggle('show');return}
+  var act=t.getAttribute('data-act');if(!act||!cur)return;
+  var ex=exams[cur.id];
+  if(act==='finish'){
+    var p=answered(ex),w=$('#warn');
+    if(p[0]<p[1]&&!ex._warned){ex._warned=true;w.hidden=false;w.textContent='Il reste '+(p[1]-p[0])+' question(s) sans réponse. Clique encore sur Finir pour corriger quand même.';return}
+    delete ex._warned;
+    ex.res=grade(ex);ex.done=true;save(cur);tabs();renderExam(cur);
+    var c=$('#copie');if(c)c.scrollIntoView();
+  }
+  if(act==='reset'){
+    delete exams[cur.id];LS.del(PFX+cur.id);tabs();renderExam(cur);window.scrollTo(0,0);
+  }
+});
+$('#tabs').addEventListener('click',function(e){
+  var b=e.target.closest('.tab');if(!b)return;
+  var id=b.getAttribute('data-route');
+  if(location.hash==='#'+id)route();else location.hash=id;
+});
+window.addEventListener('hashchange',route);
+route();
+})();
+</script>
+
+</body></html>
